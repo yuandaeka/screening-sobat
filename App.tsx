@@ -130,7 +130,7 @@ const TESTIMONIALS = [
 ];
 
 export default function App() {
-  const [viewMode, setViewMode] = useState<'landing' | 'app'>('landing');
+  const [viewMode, setViewMode] = useState<'landing' | 'app'>('app');
   const [user, setUser] = useState<UserProfile | null>(null);
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
