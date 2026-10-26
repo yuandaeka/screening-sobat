@@ -8,6 +8,7 @@ import { Feather } from '@expo/vector-icons';
 import { supabase } from './lib/supabase';
 import { fetchUserProfile } from './lib/profile';
 import { syncProfileToSheet } from './lib/sheets';
+import { getSavedDemoUser, clearDemoUser, saveDemoUser } from './lib/demo';
 
 const logoImg = require('./assets/sobatceria.png');
 
@@ -97,8 +98,16 @@ function AppCore({ user, setUser }: { user: UserProfile | null; setUser: (u: Use
             <ProfileScreen
               {...props}
               user={user}
-              onLogout={() => setUser(null)}
-              onLogin={(profile) => setUser(profile)}
+              onLogout={async () => {
+                await clearDemoUser();
+                setUser(null);
+              }}
+              onLogin={async (profile) => {
+                if (profile.isDemo) {
+                  await saveDemoUser(profile);
+                }
+                setUser(profile);
+              }}
             />
           )}
         </Tab.Screen>
@@ -165,49 +174,69 @@ export default function App() {
     };
 
     const loadProfileFromSession = async () => {
-      // true = baru selesai login via OAuth (dari hash URL) → boleh langsung ke app
-      const isFreshOAuth = await processOAuthCallback();
-      const { data } = await supabase.auth.getSession();
-      if (mounted && data.session?.user) {
-        try {
-          const { profile } = await fetchUserProfile(data.session.user.id);
-          if (mounted) {
-            setUser(profile);
-            // Hanya pindah ke aplikasi jika benar-benar baru login via OAuth.
-            // Jika hanya session tersimpan (buka link biasa), tetap di landing page.
-            if (isFreshOAuth) setViewMode('app');
-            syncProfileToSheet(profile);
-          }
-        } catch {
-          // ignore profile sync errors on startup
+      try {
+        // Cek dulu apakah ada sesi demo yang tersimpan
+        const savedDemo = await getSavedDemoUser();
+        if (savedDemo && mounted) {
+          setUser(savedDemo);
+          return;
         }
+
+        // true = baru selesai login via OAuth (dari hash URL) → boleh langsung ke app
+        const isFreshOAuth = await processOAuthCallback();
+        const { data } = await supabase.auth.getSession();
+        if (mounted && data?.session?.user) {
+          try {
+            const { profile } = await fetchUserProfile(data.session.user.id);
+            if (mounted) {
+              setUser(profile);
+              // Hanya pindah ke aplikasi jika benar-benar baru login via OAuth.
+              // Jika hanya session tersimpan (buka link biasa), tetap di landing page.
+              if (isFreshOAuth) setViewMode('app');
+              syncProfileToSheet(profile);
+            }
+          } catch {
+            // ignore profile sync errors on startup
+          }
+        }
+      } catch (err) {
+        console.warn('Startup session load error:', err);
       }
     };
 
     loadProfileFromSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (mounted) {
-        if (session?.user) {
-          fetchUserProfile(session.user.id)
-            .then(({ profile }) => {
-              if (!mounted) return;
-              setUser(profile);
-              // Hanya pindah ke aplikasi saat event SIGNED_IN (user baru login),
-              // bukan saat INITIAL_SESSION / TOKEN_REFRESHED (buka link biasa).
-              if (event === 'SIGNED_IN') setViewMode('app');
-              syncProfileToSheet(profile);
-            })
-            .catch(() => {});
-        } else {
-          setUser(null);
+    let unsubscribe: () => void = () => {};
+    try {
+      const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (mounted) {
+          if (session?.user) {
+            fetchUserProfile(session.user.id)
+              .then(({ profile }) => {
+                if (!mounted) return;
+                setUser(profile);
+                // Hanya pindah ke aplikasi saat event SIGNED_IN (user baru login),
+                // bukan saat INITIAL_SESSION / TOKEN_REFRESHED (buka link biasa).
+                if (event === 'SIGNED_IN') setViewMode('app');
+                syncProfileToSheet(profile);
+              })
+              .catch(() => {});
+          } else {
+            // Hanya hapus user jika bukan sesi demo
+            setUser((prev) => (prev?.isDemo ? prev : null));
+          }
         }
+      });
+      if (listener?.subscription) {
+        unsubscribe = () => listener.subscription.unsubscribe();
       }
-    });
+    } catch (err) {
+      console.warn('onAuthStateChange error:', err);
+    }
 
     return () => {
       mounted = false;
-      listener.subscription.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
@@ -343,7 +372,14 @@ export default function App() {
             <View className="flex-1 w-full max-w-3xl bg-white shadow-sm overflow-hidden">
               {/* Wajib login dulu sebelum masuk aplikasi */}
               {!user ? (
-                <LoginScreen onLogin={(profile) => setUser(profile)} />
+                <LoginScreen
+                  onLogin={async (profile) => {
+                    if (profile.isDemo) {
+                      await saveDemoUser(profile);
+                    }
+                    setUser(profile);
+                  }}
+                />
               ) : (
                 <AppCore user={user} setUser={setUser} />
               )}

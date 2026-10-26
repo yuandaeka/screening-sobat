@@ -13,6 +13,7 @@ export interface UserProfile {
   email: string;
   phone: string;
   children: Child[];
+  isDemo?: boolean;
 }
 
 export interface Course {

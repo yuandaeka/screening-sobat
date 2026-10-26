@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase';
 import { upsertProfile, updateChild, addChild, fetchUserProfile } from '../lib/profile';
 import { fetchOrders, OrderData } from '../lib/data';
 import { syncProfileToSheet } from '../lib/sheets';
+import { clearDemoUser, saveDemoUser } from '../lib/demo';
 
 interface ProfileScreenProps {
   user: UserProfile | null;
@@ -45,7 +46,31 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
     (async () => {
       try {
         const data = await fetchOrders();
-        if (mounted) setOrders(data);
+        if (mounted) {
+          if (data && data.length > 0) {
+            setOrders(data);
+          } else if (user?.isDemo) {
+            // Berikan contoh riwayat order untuk pengguna mode demo
+            setOrders([
+              {
+                id: 'demo-ord-1',
+                course_id: 'c1',
+                child_name: child.name || 'Arka',
+                whatsapp: user?.phone || '085876332598',
+                voucher_code: 'CERIA10K',
+                discount: 10000,
+                total_amount: 110000,
+                status: 'paid',
+                created_at: new Date().toISOString(),
+                courses: {
+                  title: 'Sensory Fun & Tactile Play',
+                  category: 'Mini Stimulation',
+                  image: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600',
+                },
+              },
+            ]);
+          }
+        }
       } catch {
         // fallback: biarkan kosong
       } finally {
@@ -55,7 +80,7 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user]);
 
   const alertMessage = (title: string, message: string) => {
     if (Platform.OS === 'web') {
@@ -82,6 +107,28 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
 
     setSaving(true);
     try {
+      if (user?.isDemo) {
+        const ageNumber = parseInt(childAge.trim()) || child.age || 4;
+        const updatedUser: UserProfile = {
+          ...user,
+          parentName: parentName.trim(),
+          phone: phone.trim() || user.phone,
+          children: [
+            {
+              id: child.id || 'demo-child-1',
+              name: childName.trim(),
+              age: ageNumber,
+              specialNeeds: specialNeeds.trim() || undefined,
+            },
+          ],
+        };
+        await saveDemoUser(updatedUser);
+        onLogin(updatedUser);
+        setEditing(false);
+        alertMessage('Profil Tersimpan (Mode Demo)', 'Data profil Anda berhasil diperbarui di mode demo.');
+        return;
+      }
+
       const { data: authData } = await supabase.auth.getUser();
       const userId = authData.user?.id;
       if (!userId) throw new Error('Sesi tidak ditemukan.');
@@ -124,7 +171,12 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
   };
 
   const handleLogout = async () => {
-    await signOut();
+    try {
+      await signOut();
+    } catch {
+      // ignore
+    }
+    await clearDemoUser();
     onLogout();
   };
 
@@ -228,9 +280,17 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
             </View>
 
             {/* Badge Member */}
-            <View className="mt-5 bg-white/15 border border-white/25 rounded-full px-3.5 py-1.5 self-start flex-row items-center gap-1.5">
-              <Feather name="star" size={12} color="#FFD100" />
-              <Text className="text-white text-[10px] font-black uppercase tracking-wide">🌟 Member Sobat Ceria</Text>
+            <View className="flex-row items-center gap-2 mt-5">
+              <View className="bg-white/15 border border-white/25 rounded-full px-3.5 py-1.5 self-start flex-row items-center gap-1.5">
+                <Feather name="star" size={12} color="#FFD100" />
+                <Text className="text-white text-[10px] font-black uppercase tracking-wide">🌟 Member Sobat Ceria</Text>
+              </View>
+              {user?.isDemo && (
+                <View className="bg-amber-400 border border-amber-300 rounded-full px-3 py-1.5 self-start flex-row items-center gap-1.5 shadow-sm">
+                  <Feather name="zap" size={12} color="#78350F" />
+                  <Text className="text-amber-950 text-[10px] font-black uppercase tracking-wide">Mode Demo</Text>
+                </View>
+              )}
             </View>
           </View>
         </View>

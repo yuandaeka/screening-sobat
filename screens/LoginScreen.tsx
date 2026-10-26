@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, Platform, ActivityIndicator, Image } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, Platform, ActivityIndicator, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { UserProfile } from '../types';
 import { supabase } from '../lib/supabase';
 import { signInWithGoogle } from '../lib/auth';
 import { fetchUserProfile, upsertProfile, addChild } from '../lib/profile';
+import { DEMO_PROFILES, saveDemoUser } from '../lib/demo';
 
 interface LoginScreenProps {
   onLogin: (user: UserProfile) => void;
@@ -22,6 +23,57 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<'register' | 'login'>('register');
 
+  const handleDemoLogin = async (type: 'bunda' | 'ayah' | 'custom' = 'bunda') => {
+    let demoUser: UserProfile;
+
+    if (type === 'custom') {
+      const pName = parentName.trim() || 'Bunda Dinda (Demo)';
+      const cName = childName.trim() || 'Arka';
+      const cAge = parseInt(childAge.trim()) || 4;
+      demoUser = {
+        parentName: pName,
+        email: email.trim() || 'demo@sobatceria.id',
+        phone: phone.trim() || '085876332598',
+        isDemo: true,
+        children: [
+          {
+            id: 'demo-child-custom',
+            name: cName,
+            age: cAge,
+            specialNeeds: specialNeeds.trim() || undefined,
+          },
+        ],
+      };
+    } else {
+      demoUser = DEMO_PROFILES[type] || DEMO_PROFILES.bunda;
+    }
+
+    await saveDemoUser(demoUser);
+    onLogin(demoUser);
+  };
+
+  const promptDemoMode = (title: string, message: string) => {
+    const errorText = `${title}: ${message}\n\n💡 Supabase sedang bermasalah atau offline. Ingin langsung masuk menggunakan Mode Demo?`;
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(errorText);
+      if (confirmed) {
+        handleDemoLogin(parentName.trim() ? 'custom' : 'bunda');
+      }
+    } else {
+      Alert.alert(
+        title,
+        `${message}\n\n💡 Supabase sedang bermasalah atau offline. Ingin langsung masuk menggunakan Mode Demo?`,
+        [
+          { text: 'Tutup', style: 'cancel' },
+          {
+            text: 'Masuk Mode Demo',
+            onPress: () => handleDemoLogin(parentName.trim() ? 'custom' : 'bunda'),
+          },
+        ]
+      );
+    }
+  };
+
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
@@ -37,7 +89,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       const { profile } = await fetchUserProfile(session.user.id);
       onLogin(profile);
     } catch (error: any) {
-      alertMessage('Login Google Gagal', error?.message || 'Terjadi kesalahan saat login.');
+      promptDemoMode('Login Google Gagal', error?.message || 'Terjadi kesalahan saat login.');
     } finally {
       setLoading(false);
     }
@@ -84,7 +136,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       const { profile } = await fetchUserProfile(userId);
       onLogin(profile);
     } catch (error: any) {
-      alertMessage('Pendaftaran Gagal', error?.message || 'Terjadi kesalahan. Coba lagi nanti.');
+      promptDemoMode('Pendaftaran Gagal (Supabase Error)', error?.message || 'Terjadi kesalahan pada Supabase.');
     } finally {
       setLoading(false);
     }
@@ -108,7 +160,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       const { profile } = await fetchUserProfile(signInData.user.id);
       onLogin(profile);
     } catch (error: any) {
-      alertMessage('Login Gagal', error?.message || 'Email atau password salah.');
+      promptDemoMode('Login Gagal (Supabase Error)', error?.message || 'Email atau password salah / koneksi Supabase terganggu.');
     } finally {
       setLoading(false);
     }
@@ -118,7 +170,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     if (Platform.OS === 'web') {
       window.alert(`${title}: ${message}`);
     } else {
-      alert(`${title}\n${message}`);
+      Alert.alert(title, message);
     }
   };
 
@@ -140,7 +192,73 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         </View>
 
         <View className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-gray-100 shadow-md">
-          <Text className="text-base font-extrabold text-[#162E5C] mb-4 text-center">Pendaftaran Akun Ceria</Text>
+          {/* Quick Demo Login Box */}
+          <View className="mb-5 bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 shadow-sm">
+            <View className="flex-row items-center justify-between mb-1.5">
+              <View className="flex-row items-center gap-1.5">
+                <View className="w-5 h-5 rounded-full bg-amber-500 items-center justify-center">
+                  <Feather name="zap" size={12} color="#FFFFFF" />
+                </View>
+                <Text className="text-xs font-black text-amber-900 tracking-wider">
+                  MODE DEMO (UJI COBA)
+                </Text>
+              </View>
+              <View className="bg-amber-200/80 px-2 py-0.5 rounded-full">
+                <Text className="text-[9px] font-extrabold text-amber-900">Bypass Supabase</Text>
+              </View>
+            </View>
+
+            <Text className="text-[11px] text-amber-800 leading-snug mb-3 font-medium">
+              Supabase sedang error atau offline? Masuk instan tanpa konfigurasi database untuk mencoba seluruh fitur Sobat Ceria:
+            </Text>
+
+            <TouchableOpacity
+              className="bg-[#D97706] active:bg-[#B45309] py-2.5 px-3 rounded-xl flex-row items-center justify-center gap-2 shadow-sm mb-2"
+              onPress={() => handleDemoLogin('bunda')}
+              disabled={loading}
+            >
+              <Feather name="play-circle" size={15} color="#FFFFFF" />
+              <Text className="text-white text-xs font-extrabold">
+                Masuk Cepat: Bunda Dinda & Arka (4 Thn)
+              </Text>
+            </TouchableOpacity>
+
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                className="flex-1 bg-white border border-amber-300 active:bg-amber-100 py-2 px-2 rounded-xl flex-row items-center justify-center gap-1.5"
+                onPress={() => handleDemoLogin('ayah')}
+                disabled={loading}
+              >
+                <Feather name="user" size={12} color="#92400E" />
+                <Text className="text-amber-950 text-[11px] font-bold">
+                  Ayah Dimas (5 Thn)
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 bg-white border border-amber-300 active:bg-amber-100 py-2 px-2 rounded-xl flex-row items-center justify-center gap-1.5"
+                onPress={() => handleDemoLogin('custom')}
+                disabled={loading}
+              >
+                <Feather name="edit-3" size={12} color="#92400E" />
+                <Text className="text-amber-950 text-[11px] font-bold">
+                  Pakai Data Form
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View className="flex-row items-center gap-3 mb-4">
+            <View className="flex-1 h-px bg-gray-200" />
+            <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
+              atau login via supabase
+            </Text>
+            <View className="flex-1 h-px bg-gray-200" />
+          </View>
+
+          <Text className="text-base font-extrabold text-[#162E5C] mb-4 text-center">
+            {mode === 'register' ? 'Pendaftaran Akun Ceria' : 'Masuk ke Akun Ceria'}
+          </Text>
 
           {/* Google Login Button */}
           <TouchableOpacity
@@ -166,7 +284,9 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
           <View className="flex-row items-center gap-3 mb-5">
             <View className="flex-1 h-px bg-gray-200" />
-            <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">atau daftar manual</Text>
+            <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
+              {mode === 'register' ? 'atau daftar manual' : 'atau masuk dengan email'}
+            </Text>
             <View className="flex-1 h-px bg-gray-200" />
           </View>
 
