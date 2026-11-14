@@ -9,9 +9,9 @@ insert into public.courses (title, category, age_range, price, seats, image, des
 ('Seminar Parenting', 'Parenting', 'Ortu', 49000, 25, 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600', 'Wadah edukasi interaktif untuk orang tua mengenai stimulasi golden age, emosi anak, & pencegahan kecanduan gadget.', 'Dr. Anita, Sp.A & Tim Psikolog'),
 ('Art and Craft Class', 'Art & Craft', '2-5 Thn', 79000, 8, 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600', 'Kriya tangan ramah anak, eksplorasi media warna, & gunting tempel untuk mengasah kreativitas dan motorik halus.', 'Kak Rian, S.Sn'),
 ('Science Class', 'Science Class', '3-7 Thn', 69000, 15, 'https://images.unsplash.com/photo-1530210124550-912dc1381cb8?w=600', 'Eksperimen sains aman dan menyenangkan untuk memicu rasa ingin tahu alami serta berpikir kritis si kecil.', 'Kak Rian, S.Sn'),
-('Pottery Class', 'Pottery Class', '3-7 Thn', 75000, 6, 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600', 'Pembentukan media tanah liat alami untuk melatih kesabaran, koordinasi jemari tangan, serta imajinasi spasial.', 'Kak Rian, S.Sn'),
-('Cooking Class', 'Cooking Class', '3-7 Thn', 85000, 10, 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600', 'Kreasi makanan sehat sederhana untuk melatih kemandirian, pengenalan tekstur bahan, & kebersihan anak.', 'Bunda Sarah, M.Psi'),
-('Sensory & Movement Class', 'Sensory Play', '2-6 Thn', 69000, 12, 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600', 'Permainan fisik aktif, rintangan motorik kasar, serta stimulasi taktil untuk perkembangan olah tubuh anak.', 'Tim Fasilitator Sobat Ceria')
+('Pottery Class', 'Pottery Class', '3-7 Thn', 69000, 6, 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600', 'Pembentukan media tanah liat alami untuk melatih kesabaran, koordinasi jemari tangan, serta imajinasi spasial.', 'Kak Rian, S.Sn'),
+('Cooking Class', 'Cooking Class', '3-7 Thn', 69000, 10, 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600', 'Kreasi makanan sehat sederhana untuk melatih kemandirian, pengenalan tekstur bahan, & kebersihan anak.', 'Bunda Sarah, M.Psi'),
+('Outbond Ceria', 'Outbond', '2-7 Thn', 69000, 12, 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?w=600', 'Permainan fisik aktif & rintangan motorik kasar anak.', 'Tim Fasilitator Sobat Ceria')
 on conflict do nothing;
 
 -- VOUCHERS (Kode Promo)

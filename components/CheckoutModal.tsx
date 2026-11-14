@@ -24,6 +24,7 @@ export default function CheckoutModal({ visible, course, user, onClose }: Checko
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [appliedVoucher, setAppliedVoucher] = useState<string>('');
+  const [guestParentName, setGuestParentName] = useState<string>('');
   const [guestChildName, setGuestChildName] = useState<string>('');
   const [guestWhatsApp, setGuestWhatsApp] = useState<string>('');
   const [vouchers, setVouchers] = useState<VoucherData[]>([]);
@@ -56,8 +57,8 @@ export default function CheckoutModal({ visible, course, user, onClose }: Checko
 
   const handleCheckout = async () => {
     if (!user) {
-      if (!guestChildName.trim() || !guestWhatsApp.trim()) {
-        alertMessage('Form Belum Lengkap', 'Harap isi Nama Anak dan No. WhatsApp Anda!');
+      if (!guestParentName.trim() || !guestChildName.trim() || !guestWhatsApp.trim()) {
+        alertMessage('Form Belum Lengkap', 'Harap isi Nama Orang Tua, Nama & Usia Anak, serta No. WhatsApp Anda!');
         return;
       }
     }
@@ -77,6 +78,7 @@ export default function CheckoutModal({ visible, course, user, onClose }: Checko
       await syncOrderToSheet({
         courseTitle: course.title,
         courseCategory: course.category,
+        parentName: guestParentName.trim() || user?.parentName || user?.fullName || '',
         childName: guestChildName.trim() || user?.children?.[0]?.name || 'Anak Ceria',
         whatsapp: guestWhatsApp.trim() || user?.phone || '',
         voucherCode: appliedVoucher || null,
@@ -96,6 +98,7 @@ export default function CheckoutModal({ visible, course, user, onClose }: Checko
     setVoucherCode('');
     setDiscount(0);
     setAppliedVoucher('');
+    setGuestParentName('');
     setGuestChildName('');
     setGuestWhatsApp('');
     onClose();
@@ -183,11 +186,18 @@ export default function CheckoutModal({ visible, course, user, onClose }: Checko
           {!user && (
             <View className="mb-4">
               <Text className="text-[10px] font-black text-brand-navy mb-1.5 uppercase tracking-wider">
-                Informasi Orang Tua & Anak
+                Form Pendaftaran
               </Text>
               <TextInput
                 className="w-full h-11 bg-gray-50 border border-gray-300 rounded-xl px-3.5 text-xs text-brand-navy mb-2"
-                placeholder="Nama Anak (e.g. Leo)"
+                placeholder="Nama Orang Tua (Contoh: Bunda Dinda)"
+                placeholderTextColor="#9CA3AF"
+                value={guestParentName}
+                onChangeText={setGuestParentName}
+              />
+              <TextInput
+                className="w-full h-11 bg-gray-50 border border-gray-300 rounded-xl px-3.5 text-xs text-brand-navy mb-2"
+                placeholder="Nama & Usia Anak (Contoh: Arka - 4 Tahun)"
                 placeholderTextColor="#9CA3AF"
                 value={guestChildName}
                 onChangeText={setGuestChildName}

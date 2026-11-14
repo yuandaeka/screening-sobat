@@ -67,18 +67,79 @@ export default function ScreeningScreen({ navigation, user }: { navigation: any;
       <ScrollView contentContainerStyle={{ paddingBottom: 110 }} className="p-4 md:p-8 max-w-5xl mx-auto w-full" showsVerticalScrollIndicator={false}>
         {/* Header Title */}
         <View className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xs mb-6 flex-row items-center justify-between">
-          <View>
-            <View className="flex-row items-center gap-2 mb-1">
+          <View className="flex-1 pr-2">
+            <View className="flex-row items-center gap-2 mb-1.5">
               <View className="w-2.5 h-2.5 rounded-full bg-[#D82B5A]" />
-              <Text className="text-lg md:text-xl font-extrabold text-[#162E5C]">Screening STPPA Digital</Text>
+              <Text className="text-[10px] font-black text-[#D82B5A] tracking-widest uppercase">Fitur Aplikasi Terpadu</Text>
             </View>
-            <Text className="text-xs text-gray-500 font-medium">
-              Hasil evaluasi 6 aspek perkembangan anak oleh psikolog & fasilitator Sobat Ceria.
+            <Text className="text-lg md:text-xl font-extrabold text-[#162E5C]">Screening STPPA Digital Si Kecil</Text>
+            <Text className="text-xs text-gray-500 font-medium mt-1 leading-relaxed">
+              Pantau 6 aspek perkembangan anak usia 2–7 tahun oleh psikolog & fasilitator Sobat Ceria.
             </Text>
           </View>
 
           <View className="bg-[#D82B5A]/10 px-3.5 py-1.5 rounded-full border border-[#D82B5A]/20">
             <Text className="text-xs font-black text-[#D82B5A]">{child.name} ({child.age} Thn)</Text>
+          </View>
+        </View>
+
+        {/* Ringkasan Status Capaian */}
+        <View className="mb-6">
+          <Text className="text-base font-extrabold text-[#162E5C] mb-3">Ringkasan Status Capaian</Text>
+          <View className="gap-3">
+            {/* 1. Sensorik & Motorik Halus */}
+            <View className="bg-white rounded-3xl border border-gray-100 shadow-xs p-4">
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center gap-2.5">
+                  <View className="w-9 h-9 rounded-2xl bg-[#30B864]/15 items-center justify-center">
+                    <Feather name="zap" size={16} color="#30B864" />
+                  </View>
+                  <Text className="text-xs font-black text-[#162E5C]">Sensorik & Motorik Halus</Text>
+                </View>
+                <View className="bg-[#30B864]/10 px-3 py-1 rounded-full border border-[#30B864]/20">
+                  <Text className="text-[10px] font-black text-[#30B864]">Optimal (88%)</Text>
+                </View>
+              </View>
+              <View className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                <View className="h-full bg-[#30B864] rounded-full" style={{ width: '88%' }} />
+              </View>
+            </View>
+
+            {/* 2. Komunikasi & Kosa Kata */}
+            <View className="bg-white rounded-3xl border border-gray-100 shadow-xs p-4">
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center gap-2.5">
+                  <View className="w-9 h-9 rounded-2xl bg-[#2DA9E9]/15 items-center justify-center">
+                    <Feather name="message-circle" size={16} color="#2DA9E9" />
+                  </View>
+                  <Text className="text-xs font-black text-[#162E5C]">Komunikasi & Kosa Kata</Text>
+                </View>
+                <View className="bg-[#2DA9E9]/10 px-3 py-1 rounded-full border border-[#2DA9E9]/20">
+                  <Text className="text-[10px] font-black text-[#2DA9E9]">Sangat Baik (92%)</Text>
+                </View>
+              </View>
+              <View className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                <View className="h-full bg-[#2DA9E9] rounded-full" style={{ width: '92%' }} />
+              </View>
+            </View>
+
+            {/* 3. Kemandirian & Sosialisasi */}
+            <View className="bg-white rounded-3xl border border-gray-100 shadow-xs p-4">
+              <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center gap-2.5">
+                  <View className="w-9 h-9 rounded-2xl bg-[#F77712]/15 items-center justify-center">
+                    <Feather name="users" size={16} color="#F77712" />
+                  </View>
+                  <Text className="text-xs font-black text-[#162E5C]">Kemandirian & Sosialisasi</Text>
+                </View>
+                <View className="bg-[#F77712]/10 px-3 py-1 rounded-full border border-[#F77712]/20">
+                  <Text className="text-[10px] font-black text-[#F77712]">Perlu Stimulasi</Text>
+                </View>
+              </View>
+              <View className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                <View className="h-full bg-[#F77712] rounded-full" style={{ width: '62%' }} />
+              </View>
+            </View>
           </View>
         </View>
 
@@ -132,6 +193,64 @@ export default function ScreeningScreen({ navigation, user }: { navigation: any;
               </View>
             );
           })}
+        </View>
+
+        {/* Kuesioner Interaktif 6 Aspek STPPA */}
+        <View className="mb-6">
+          <View className="mb-3">
+            <Text className="text-base font-extrabold text-[#162E5C]">Kuesioner Observasi 6 Aspek STPPA</Text>
+            <Text className="text-[11px] text-gray-500 font-medium">Isi observasi sesuai perkembangan si kecil</Text>
+          </View>
+          <View className="flex-row flex-wrap justify-between gap-y-3">
+            {[
+              { icon: 'heart', color: '#D82B5A', title: 'Nilai Agama & Moral' },
+              { icon: 'activity', color: '#2DA9E9', title: 'Fisik-Motorik' },
+              { icon: 'cpu', color: '#8B22C0', title: 'Kognitif' },
+              { icon: 'message-circle', color: '#30B864', title: 'Bahasa' },
+              { icon: 'users', color: '#F77712', title: 'Sosial-Emosional' },
+              { icon: 'music', color: '#EAB308', title: 'Seni' },
+            ].map((aspect) => (
+              <TouchableOpacity
+                key={aspect.title}
+                style={{ width: '48%' }}
+                activeOpacity={0.85}
+                onPress={() => {
+                  const msg = `Form observasi "${aspect.title}" akan segera dibuka.\n(Fitur interaktif kuesioner tersedia pada tahap berikutnya)`;
+                  Platform.OS === 'web' ? window.alert(msg) : alert(msg);
+                }}
+                className="bg-white p-4 rounded-3xl border border-gray-100 shadow-xs"
+              >
+                <View className="w-10 h-10 rounded-2xl items-center justify-center mb-2" style={{ backgroundColor: `${aspect.color}15` }}>
+                  <Feather name={aspect.icon as any} size={18} color={aspect.color} />
+                </View>
+                <Text className="text-xs font-black text-[#162E5C]" numberOfLines={2}>{aspect.title}</Text>
+                <View className="flex-row items-center gap-1 mt-1.5">
+                  <Text className="text-[10px] font-black text-[#D82B5A]">Isi Observasi</Text>
+                  <Feather name="chevron-right" size={12} color="#D82B5A" />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Konsultasi Psikolog */}
+        <View className="bg-[#162E5C] p-5 rounded-[2.5rem] mb-6 flex-row items-center justify-between shadow-md">
+          <View className="flex-1 pr-3">
+            <Text className="text-white text-sm font-extrabold mb-1">Konsultasi Psikolog Anak</Text>
+            <Text className="text-blue-100 text-[11px] font-medium leading-snug">
+              Jadwalkan konsultasi strategi stimulasi lanjutan bersama psikolog tumbuh kembang.
+            </Text>
+          </View>
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={() => {
+              const url = 'https://wa.me/6285876332598?text=Halo%20Sobat%20Ceria,%20saya%20ingin%20menjadwalkan%20konsultasi%20psikolog%20anak.';
+              Platform.OS === 'web' ? window.open(url, '_blank') : Linking.openURL(url);
+            }}
+            className="bg-white px-4 py-2.5 rounded-full shadow-xs active:scale-95"
+          >
+            <Text className="text-xs font-black text-[#162E5C]">Jadwalkan</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Download PDF Action Button */}
