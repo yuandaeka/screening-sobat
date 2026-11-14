@@ -1,117 +1,64 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { View, Text, TouchableOpacity, ScrollView, Platform, Dimensions, Image, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './lib/supabase';
 import { fetchUserProfile } from './lib/profile';
 import { syncProfileToSheet } from './lib/sheets';
-import { getSavedDemoUser, clearDemoUser, saveDemoUser } from './lib/demo';
+import { getSavedDemoUser } from './lib/demo';
 
 const logoImg = require('./assets/sobatceria.png');
 
 // Import Screens
-import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreen';
-import CatalogScreen from './screens/CatalogScreen';
-import ScreeningScreen from './screens/ScreeningScreen';
-import RewardScreen from './screens/RewardScreen';
-import ProfileScreen from './screens/ProfileScreen';
+import AuthScreen from './screens/AuthScreen';
+import OnboardingScreen from './screens/OnboardingScreen';
+import RoleBasedTabs from './components/RoleBasedTabs';
 
 // Import Types
 import { UserProfile } from './types';
 
-const Tab = createBottomTabNavigator();
-
-
+export const navigationRef = createNavigationContainerRef<any>();
 
 // --- CORE APP STACK ---
 function AppCore({ user, setUser }: { user: UserProfile | null; setUser: (u: UserProfile | null) => void }) {
+  // 1) Splash/Onboarding -> 2) Login (pilih peran) -> 3) App
+  const [showSplash, setShowSplash] = useState<boolean>(true);
+  const [showLogin, setShowLogin] = useState<boolean>(true);
+
+  if (showSplash) {
+    return (
+      <OnboardingScreen
+        onGetStarted={() => setShowSplash(false)}
+        onLoginPress={() => setShowSplash(false)}
+      />
+    );
+  }
+
+  if (showLogin) {
+    return (
+      <AuthScreen
+        onBack={() => setShowSplash(true)}
+        onAuthed={(profile) => {
+          setShowLogin(false);
+          setUser(profile);
+        }}
+      />
+    );
+  }
+
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarIcon: ({ focused }) => {
-            let iconName: any = 'home';
-            if (route.name === 'Beranda') {
-              iconName = 'home';
-            } else if (route.name === 'Kelas') {
-              iconName = 'shopping-bag';
-            } else if (route.name === 'Screening') {
-              iconName = 'activity';
-            } else if (route.name === 'Worksheet') {
-              iconName = 'gift';
-            } else if (route.name === 'Profil') {
-              iconName = 'user';
-            }
-            return (
-              <Feather
-                name={iconName}
-                size={18}
-                color={focused ? '#D82B5A' : '#6B7280'}
-              />
-            );
-          },
-          tabBarActiveTintColor: '#D82B5A',
-          tabBarInactiveTintColor: '#6B7280',
-          tabBarStyle: {
-            backgroundColor: '#FFFFFF',
-            borderTopWidth: 0,
-            height: 58,
-            borderRadius: 22,
-            position: 'absolute',
-            bottom: 12,
-            left: 12,
-            right: 12,
-            shadowColor: '#1B254B',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.08,
-            shadowRadius: 10,
-            elevation: 3,
-            paddingBottom: 0,
-          },
-          tabBarLabelStyle: {
-            fontSize: 9,
-            fontWeight: 'bold',
-            marginTop: -2,
-            marginBottom: 2,
-          },
-        })}
-      >
-        <Tab.Screen name="Beranda">
-          {(props) => <HomeScreen {...props} user={user} />}
-        </Tab.Screen>
-        <Tab.Screen name="Kelas">
-          {(props) => <CatalogScreen {...props} user={user} />}
-        </Tab.Screen>
-        <Tab.Screen name="Screening">
-          {(props) => <ScreeningScreen {...props} user={user} />}
-        </Tab.Screen>
-        <Tab.Screen name="Worksheet">
-          {(props) => <RewardScreen {...props} user={user} />}
-        </Tab.Screen>
-        <Tab.Screen name="Profil">
-          {(props) => (
-            <ProfileScreen
-              {...props}
-              user={user}
-              onLogout={async () => {
-                await clearDemoUser();
-                setUser(null);
-              }}
-              onLogin={async (profile) => {
-                if (profile.isDemo) {
-                  await saveDemoUser(profile);
-                }
-                setUser(profile);
-              }}
-            />
-          )}
-        </Tab.Screen>
-      </Tab.Navigator>
+    <NavigationContainer ref={navigationRef}>
+      <RoleBasedTabs
+        user={user}
+        setUser={setUser}
+        onOpenOnboarding={() => {
+          setShowLogin(true);
+          setShowSplash(true);
+        }}
+      />
     </NavigationContainer>
   );
 }
@@ -370,19 +317,7 @@ export default function App() {
           {/* Main App Workspace (Clean Layout without Phone Frame) */}
           <View className="flex-1 w-full bg-brand-cream justify-center items-center">
             <View className="flex-1 w-full max-w-3xl bg-white shadow-sm overflow-hidden">
-              {/* Wajib login dulu sebelum masuk aplikasi */}
-              {!user ? (
-                <LoginScreen
-                  onLogin={async (profile) => {
-                    if (profile.isDemo) {
-                      await saveDemoUser(profile);
-                    }
-                    setUser(profile);
-                  }}
-                />
-              ) : (
-                <AppCore user={user} setUser={setUser} />
-              )}
+              <AppCore user={user} setUser={setUser} />
             </View>
           </View>
         </View>

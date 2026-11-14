@@ -68,7 +68,7 @@ const FALLBACK_COURSES: Course[] = [
     title: 'Pottery Class',
     category: 'Pottery Class',
     ageRange: '3-7 Thn',
-    price: 75000,
+    price: 69000,
     seats: 6,
     image: 'pottery',
     description: 'Mengembangkan kreativitas, konsentrasi, koordinasi tangan, dan regulasi emosi.',
@@ -79,7 +79,7 @@ const FALLBACK_COURSES: Course[] = [
     title: 'Cooking Class',
     category: 'Cooking Class',
     ageRange: '3-7 Thn',
-    price: 85000,
+    price: 69000,
     seats: 10,
     image: 'cooking',
     description: 'Melatih kemandirian, life skill, numerasi, dan sensorik.',
@@ -160,7 +160,7 @@ export default function CatalogScreen({ navigation, user }: { navigation: any; u
             </View>
           ) : (
           <View className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {courses.map((course) => (
+            {courses.map((course, index) => (
               <View
                 key={course.id}
                 className="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-xs flex-col justify-between"
@@ -172,11 +172,18 @@ export default function CatalogScreen({ navigation, user }: { navigation: any; u
                       className="w-full h-full object-cover"
                       style={{ width: '100%', height: '100%' }}
                     />
-                    <View className="absolute top-3 left-3 bg-[#1F2937] px-3 py-1 rounded-full shadow-xs">
-                      <Text className="text-[10px] font-black text-white">{course.category}</Text>
-                    </View>
-                    <View className="absolute top-3 right-3 bg-[#D82B5A] px-3 py-1 rounded-full shadow-xs">
-                      <Text className="text-[10px] font-black text-white">{course.ageRange}</Text>
+                    <View className="absolute top-3 left-3 right-3 flex-row items-center justify-between">
+                      <View className="flex-row items-center gap-1.5">
+                        <View className="w-7 h-7 rounded-full bg-white border border-[#D82B5A] items-center justify-center shadow-xs">
+                          <Text className="text-[11px] font-black text-[#D82B5A]">{index + 1}</Text>
+                        </View>
+                        <View className="bg-[#1F2937] px-3 py-1 rounded-full shadow-xs">
+                          <Text className="text-[10px] font-black text-white">{course.category}</Text>
+                        </View>
+                      </View>
+                      <View className="bg-[#D82B5A] px-3 py-1 rounded-full shadow-xs">
+                        <Text className="text-[10px] font-black text-white">{course.ageRange}</Text>
+                      </View>
                     </View>
                   </View>
 

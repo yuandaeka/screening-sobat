@@ -31,6 +31,7 @@ export async function syncProfileToSheet(user: UserProfile) {
 export async function syncOrderToSheet(input: {
   courseTitle: string;
   courseCategory: string;
+  parentName?: string;
   childName: string;
   whatsapp: string;
   voucherCode: string | null;
@@ -48,6 +49,7 @@ export async function syncOrderToSheet(input: {
         type: 'order',
         course_title: input.courseTitle,
         course_category: input.courseCategory,
+        parent_name: input.parentName || '',
         child_name: input.childName,
         whatsapp: input.whatsapp,
         voucher_code: input.voucherCode,
