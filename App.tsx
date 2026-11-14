@@ -311,12 +311,12 @@ export default function App() {
   // --- RENDER FULL WEB APP MODE (No Phone Frame) ---
   if (viewMode === 'app') {
     return (
-      <SafeAreaProvider>
+      <SafeAreaProvider style={{ flex: 1, minHeight: '100%' }}>
         <StatusBar style="dark" />
-        <View className="flex-1 bg-brand-cream relative">
+        <View style={{ flex: 1, minHeight: '100%', width: '100%' }} className="flex-1 bg-[#FAF6F0] relative">
           {/* Main App Workspace (Clean Layout without Phone Frame) */}
-          <View className="flex-1 w-full bg-brand-cream justify-center items-center">
-            <View className="flex-1 w-full max-w-3xl bg-white shadow-sm overflow-hidden">
+          <View style={{ flex: 1, minHeight: '100%', width: '100%' }} className="flex-1 w-full bg-[#FAF6F0] justify-center items-center">
+            <View style={{ flex: 1, minHeight: '100%', width: '100%' }} className="flex-1 w-full max-w-3xl bg-white shadow-sm overflow-hidden">
               <AppCore user={user} setUser={setUser} />
             </View>
           </View>

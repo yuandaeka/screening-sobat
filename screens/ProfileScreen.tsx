@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { UserProfile } from '../types';
 import { getRoleMeta } from '../lib/roles';
-import AuthScreen from './AuthScreen';
 import { signOut } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { upsertProfile, updateChild, addChild, fetchUserProfile } from '../lib/profile';
@@ -17,16 +16,33 @@ interface ProfileScreenProps {
   onLogout: () => void;
   onLogin?: (user: UserProfile) => void;
   onOpenOnboarding?: () => void;
+  onOpenAuth?: () => void;
 }
 
-export default function ProfileScreen({ user, onLogout, onLogin, onOpenOnboarding }: ProfileScreenProps) {
+export default function ProfileScreen({ user, onLogout, onLogin, onOpenOnboarding, onOpenAuth }: ProfileScreenProps) {
   if (!user) {
     return (
-      <AuthScreen
-        onAuthed={(p) => {
-          if (p && onLogin) onLogin(p);
-        }}
-      />
+      <SafeAreaView style={{ flex: 1 }} className="bg-[#FAF6F0]">
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 24, paddingBottom: 110 }}
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="w-20 h-20 rounded-3xl bg-[#D82B5A] items-center justify-center mb-5">
+            <Feather name="user" size={32} color="#FFFFFF" />
+          </View>
+          <Text className="text-lg font-black text-[#162E5C] mb-2 text-center">Masuk ke Sobat Ceria</Text>
+          <Text className="text-xs text-gray-500 text-center leading-relaxed mb-6 max-w-xs">
+            Pilih peran Anda untuk mengakses fitur lengkap — Orang Tua, Guru/Tutor, Volunteer, Mitra, atau Collaboration.
+          </Text>
+          <TouchableOpacity
+            onPress={onOpenAuth}
+            className="bg-[#D82B5A] px-8 py-3.5 rounded-full shadow-md active:scale-95"
+          >
+            <Text className="text-white text-sm font-black">Masuk / Pilih Peran</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
