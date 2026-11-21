@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   StatusBar,
+  useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -18,37 +19,40 @@ interface OnboardingScreenProps {
 
 export default function OnboardingScreen({ onGetStarted }: OnboardingScreenProps) {
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { width, height }]}>
       <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
 
-      {/* 1. Foto Full Screen 100% Mengisi Seluruh Layar */}
-      <Image
-        source={require('../assets/dokumentasi sobat/cooking-program.jpeg')}
-        style={StyleSheet.absoluteFill}
-        resizeMode="cover"
-      />
+      {/* 1. Foto Background Full Screen Mengisi Seluruh Layar */}
+      <View style={[styles.imageWrapper, { width, height }]}>
+        <Image
+          source={require('../assets/dokumentasi sobat/cooking-program.jpeg')}
+          style={styles.heroImage}
+          resizeMode="cover"
+        />
 
-      {/* 2. Gradasi Halus Menyeluruh dari Atas ke Bawah */}
-      <LinearGradient
-        colors={[
-          'rgba(255, 255, 255, 0)',
-          'rgba(255, 255, 255, 0.15)',
-          'rgba(255, 255, 255, 0.75)',
-          'rgba(255, 255, 255, 0.96)',
-          '#FFFFFF',
-        ]}
-        locations={[0, 0.35, 0.58, 0.78, 0.95]}
-        style={StyleSheet.absoluteFill}
-      />
+        {/* 2. Gradasi Halus: Bening di Atas (Foto Jelas), Putih Lembut di Bawah */}
+        <LinearGradient
+          colors={[
+            'rgba(255, 255, 255, 0)',
+            'rgba(255, 255, 255, 0)',
+            'rgba(255, 255, 255, 0.45)',
+            'rgba(255, 255, 255, 0.88)',
+            '#FFFFFF',
+          ]}
+          locations={[0, 0.42, 0.62, 0.8, 0.96]}
+          style={styles.gradientFade}
+        />
+      </View>
 
       {/* 3. Konten Teks & Tombol di Bagian Bawah */}
       <View
         style={[
           styles.bottomContent,
           {
-            paddingBottom: Math.max(insets.bottom + 24, 40),
+            paddingBottom: Math.max(insets.bottom + 20, 36),
           },
         ]}
       >
@@ -90,11 +94,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     position: 'relative',
+    overflow: 'hidden',
+  },
+  imageWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  gradientFade: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
   },
   bottomContent: {
-    flex: 1,
-    paddingHorizontal: 28,
-    justifyContent: 'flex-end',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 26,
     alignItems: 'center',
     zIndex: 10,
   },
@@ -103,12 +130,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(216, 43, 90, 0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   brandLogo: {
     width: 22,
@@ -122,13 +153,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   title: {
-    fontSize: 30,
+    fontSize: 29,
     fontWeight: '800',
     color: '#0F172A',
     textAlign: 'center',
-    lineHeight: 38,
+    lineHeight: 37,
     letterSpacing: -0.3,
-    marginBottom: 14,
+    marginBottom: 12,
+    maxWidth: 420,
   },
   subtitle: {
     fontSize: 14.5,
@@ -136,11 +168,13 @@ const styles = StyleSheet.create({
     color: '#475569',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 32,
-    paddingHorizontal: 6,
+    marginBottom: 30,
+    paddingHorizontal: 4,
+    maxWidth: 400,
   },
   ctaButton: {
     width: '100%',
+    maxWidth: 420,
     height: 62,
     backgroundColor: '#D82B5A',
     borderRadius: 32,
@@ -177,3 +211,4 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 });
+
