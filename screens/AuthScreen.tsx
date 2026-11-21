@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { UserProfile, UserRole } from '../types';
 import { supabase } from '../lib/supabase';
 import { signInWithGoogle } from '../lib/auth';
@@ -27,15 +27,16 @@ const DEMO_ROLES: {
   id: UserRole;
   label: string;
   color: string;
+  bgPastel: string;
   icon: keyof typeof Feather.glyphMap;
   demoKey: string | null;
 }[] = [
-  { id: 'guest', label: 'Umum (Guest)', color: '#64748B', icon: 'globe', demoKey: null },
-  { id: 'parent', label: 'Orang Tua', color: '#C81E45', icon: 'users', demoKey: 'bunda' },
-  { id: 'tutor', label: 'Guru / Tutor', color: '#5B21B6', icon: 'award', demoKey: 'guru' },
-  { id: 'volunteer', label: 'Volunteer', color: '#1E293B', icon: 'heart', demoKey: 'relawan' },
-  { id: 'mitra', label: 'Mitra TK/Klinik', color: '#16A34A', icon: 'activity', demoKey: 'mitra' },
-  { id: 'collab', label: 'Collaboration', color: '#0284C7', icon: 'trending-up', demoKey: 'collab' },
+  { id: 'guest', label: 'Umum', color: '#64748B', bgPastel: '#F1F5F9', icon: 'globe', demoKey: null },
+  { id: 'parent', label: 'Orang Tua', color: '#C81E45', bgPastel: '#FFF1F2', icon: 'users', demoKey: 'bunda' },
+  { id: 'tutor', label: 'Guru / Tutor', color: '#6D28D9', bgPastel: '#F5F3FF', icon: 'award', demoKey: 'guru' },
+  { id: 'volunteer', label: 'Volunteer', color: '#1E293B', bgPastel: '#F1F5F9', icon: 'heart', demoKey: 'relawan' },
+  { id: 'mitra', label: 'Mitra TK/Klinik', color: '#16A34A', bgPastel: '#F0FDF4', icon: 'activity', demoKey: 'mitra' },
+  { id: 'collab', label: 'Collaboration', color: '#0284C7', bgPastel: '#F0F9FF', icon: 'trending-up', demoKey: 'collab' },
 ];
 
 const PRIMARY_COLOR = '#C81E45';
@@ -190,7 +191,7 @@ export default function AuthScreen({ onBack, onAuthed }: AuthScreenProps) {
 
             {/* Logo App di Tengah */}
             <View style={styles.logoWrapper}>
-              <View style={[styles.logoBox, { backgroundColor: PRIMARY_COLOR }]}>
+              <View style={styles.logoBox}>
                 <Image
                   source={require('../assets/sobatceria.png')}
                   style={styles.logoImage}
@@ -314,37 +315,67 @@ export default function AuthScreen({ onBack, onAuthed }: AuthScreenProps) {
             {/* Social Login */}
             <View style={styles.socialContainer}>
               <TouchableOpacity style={styles.socialButton} activeOpacity={0.85} onPress={handleGoogle}>
-                <Text style={styles.googleLogoText}>G</Text>
+                <Ionicons name="logo-google" size={19} color="#EA4335" style={styles.socialIcon} />
                 <Text style={styles.socialButtonText}>Log in with Google</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialButton} activeOpacity={0.85} onPress={handleApple}>
-                <Text style={styles.appleLogoText}></Text>
+                <Ionicons name="logo-apple" size={20} color="#000000" style={styles.socialIcon} />
                 <Text style={styles.socialButtonText}>Log in with Apple</Text>
               </TouchableOpacity>
             </View>
 
-            {/* PANEL MODE DEMO CEPAT (6 Role) */}
+            {/* PANEL MODE DEMO CEPAT (Grid 2x3 Rapi & Modern) */}
             <View style={styles.demoPanel}>
               <View style={styles.demoHeaderRow}>
-                <Feather name="star" size={15} color="#C81E45" />
-                <Text style={styles.demoTitle}>Mode Demo Cepat (Langsung Masuk Tanpa Isi Form):</Text>
+                <View style={styles.demoBadgeIcon}>
+                  <Feather name="zap" size={13} color="#C81E45" />
+                </View>
+                <View style={styles.demoHeaderTextWrap}>
+                  <Text style={styles.demoTitle}>Mode Demo Cepat</Text>
+                  <Text style={styles.demoSubTitle}>Pilih peran untuk langsung masuk</Text>
+                </View>
               </View>
-              <View style={styles.demoChipsWrap}>
+              <View style={styles.demoGrid}>
                 {DEMO_ROLES.map((item) => {
                   const isSelected = selectedDemo === item.id;
                   return (
                     <TouchableOpacity
                       key={item.id}
                       style={[
-                        styles.demoChip,
-                        isSelected && { backgroundColor: item.color, borderColor: item.color },
+                        styles.demoCard,
+                        isSelected
+                          ? {
+                              backgroundColor: item.bgPastel,
+                              borderColor: item.color,
+                              borderWidth: 1.5,
+                            }
+                          : {
+                              backgroundColor: '#F8FAFC',
+                              borderColor: '#E2E8F0',
+                              borderWidth: 1,
+                            },
                       ]}
                       onPress={() => handleQuickDemo(item.id)}
-                      activeOpacity={0.85}
+                      activeOpacity={0.82}
                     >
-                      <Feather name={item.icon} size={13} color={isSelected ? '#FFFFFF' : item.color} />
-                      <Text style={[styles.demoChipText, isSelected && { color: '#FFFFFF', fontWeight: '700' }]}>
+                      <View
+                        style={[
+                          styles.demoIconBox,
+                          { backgroundColor: isSelected ? '#FFFFFF' : item.bgPastel },
+                        ]}
+                      >
+                        <Feather name={item.icon} size={15} color={item.color} />
+                      </View>
+                      <Text
+                        style={[
+                          styles.demoCardLabel,
+                          isSelected
+                            ? { color: item.color, fontWeight: '700' }
+                            : { color: '#334155', fontWeight: '600' },
+                        ]}
+                        numberOfLines={1}
+                      >
                         {item.label}
                       </Text>
                     </TouchableOpacity>
@@ -410,20 +441,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoBox: {
-    width: 76,
-    height: 76,
-    borderRadius: 22,
+    width: 82,
+    height: 82,
+    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FCE7F3',
     shadowColor: '#C81E45',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
   },
   logoImage: {
-    width: 48,
-    height: 48,
+    width: 62,
+    height: 62,
   },
   headerTextContainer: {
     alignItems: 'center',
@@ -558,15 +592,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 1,
   },
-  googleLogoText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#EA4335',
-    marginRight: 10,
-  },
-  appleLogoText: {
-    fontSize: 20,
-    color: '#000000',
+  socialIcon: {
     marginRight: 10,
   },
   socialButtonText: {
@@ -578,41 +604,72 @@ const styles = StyleSheet.create({
     marginTop: 24,
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 14,
+    padding: 16,
     borderWidth: 1,
     borderColor: '#FCE7F3',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
   demoHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    gap: 6,
-  },
-  demoTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1E293B',
-  },
-  demoChipsWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    marginBottom: 14,
     gap: 8,
   },
-  demoChip: {
+  demoBadgeIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#FFF1F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  demoHeaderTextWrap: {
+    flex: 1,
+  },
+  demoTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1E293B',
+    lineHeight: 18,
+  },
+  demoSubTitle: {
+    fontSize: 11.5,
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  demoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 10,
+  },
+  demoCard: {
+    width: '48%',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingVertical: 7,
-    paddingHorizontal: 11,
-    borderRadius: 20,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    padding: 10,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  demoChipText: {
-    fontSize: 11.5,
-    color: '#334155',
-    fontWeight: '600',
+  demoIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  demoCardLabel: {
+    fontSize: 12.5,
+    flexShrink: 1,
   },
   footerRow: {
     flexDirection: 'row',
