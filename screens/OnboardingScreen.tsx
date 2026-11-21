@@ -5,50 +5,54 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Dimensions,
   StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width, height } = Dimensions.get('window');
-
 interface OnboardingScreenProps {
   onGetStarted: () => void;
   onLoginPress?: () => void;
 }
 
-export default function OnboardingScreen({ onGetStarted, onLoginPress }: OnboardingScreenProps) {
+export default function OnboardingScreen({ onGetStarted }: OnboardingScreenProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
 
-      {/* 1. Gambar Full-Bleed dari Folder Lokal Assets */}
-      <View style={styles.imageWrapper}>
-        <Image
-          source={require('../assets/dokumentasi sobat/cooking-program.jpeg')}
-          style={styles.heroImage}
-          resizeMode="cover"
-        />
+      {/* 1. Foto Full Screen 100% Mengisi Seluruh Layar */}
+      <Image
+        source={require('../assets/dokumentasi sobat/cooking-program.jpeg')}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      />
 
-        {/* Efek Gradasi Putih Halus (Smooth Fade-Out) Menyatu ke Bawah */}
-        <LinearGradient
-          colors={[
-            'rgba(255, 255, 255, 0)',
-            'rgba(255, 255, 255, 0.65)',
-            'rgba(255, 255, 255, 0.95)',
-            '#FFFFFF',
-          ]}
-          locations={[0, 0.45, 0.78, 1]}
-          style={styles.gradientFade}
-        />
-      </View>
+      {/* 2. Gradasi Halus Menyeluruh dari Atas ke Bawah */}
+      <LinearGradient
+        colors={[
+          'rgba(255, 255, 255, 0)',
+          'rgba(255, 255, 255, 0.15)',
+          'rgba(255, 255, 255, 0.75)',
+          'rgba(255, 255, 255, 0.96)',
+          '#FFFFFF',
+        ]}
+        locations={[0, 0.35, 0.58, 0.78, 0.95]}
+        style={StyleSheet.absoluteFill}
+      />
 
-      {/* 2. Konten Teks & Tombol Menyatu di Atas Gradasi Putih */}
-      <View style={[styles.bottomContent, { paddingBottom: Math.max(insets.bottom + 20, 42) }]}>
+      {/* 3. Konten Teks & Tombol di Bagian Bawah */}
+      <View
+        style={[
+          styles.bottomContent,
+          {
+            paddingBottom: Math.max(insets.bottom + 24, 40),
+          },
+        ]}
+      >
+        {/* Brand Chip */}
         <View style={styles.brandRow}>
           <Image
             source={require('../assets/sobatceria.png')}
@@ -58,28 +62,24 @@ export default function OnboardingScreen({ onGetStarted, onLoginPress }: Onboard
           <Text style={styles.brandName}>Sobat Ceria</Text>
         </View>
 
+        {/* Heading */}
         <Text style={styles.title}>
           Care For Your Child{'\n'}Optimal Development
         </Text>
 
+        {/* Subtitle */}
         <Text style={styles.subtitle}>
           Program stimulasi tumbuh kembang anak yang inklusif berbasis Mindfulness & Family
           Co-Creation bersama fasilitator profesional.
         </Text>
 
-        {/* Tombol Pill Utama dengan Lingkaran Panah di Kanan */}
-        <TouchableOpacity style={styles.ctaButton} onPress={onGetStarted} activeOpacity={0.85}>
+        {/* Tombol Utama Pill Lebar Penuh (Full Width) */}
+        <TouchableOpacity style={styles.ctaButton} onPress={onGetStarted} activeOpacity={0.88}>
           <Text style={styles.ctaButtonText}>Mulai Sekarang</Text>
           <View style={styles.arrowCircle}>
             <Feather name="arrow-right" size={20} color="#D82B5A" />
           </View>
         </TouchableOpacity>
-
-        {onLoginPress && (
-          <TouchableOpacity style={styles.loginLink} onPress={onLoginPress} activeOpacity={0.7}>
-            <Text style={styles.loginText}>Sudah punya akun? Masuk di sini</Text>
-          </TouchableOpacity>
-        )}
       </View>
     </View>
   );
@@ -89,44 +89,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-  },
-  imageWrapper: {
-    width,
-    height: height * 0.76,
     position: 'relative',
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gradientFade: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: height * 0.32,
   },
   bottomContent: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
     paddingHorizontal: 28,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    marginTop: -height * 0.12,
+    zIndex: 10,
   },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 18,
+    marginBottom: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(216, 43, 90, 0.15)',
   },
   brandLogo: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
   },
   brandName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
     color: '#D82B5A',
     letterSpacing: 0.2,
@@ -143,10 +133,11 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14.5,
     fontWeight: '400',
-    color: '#71717A',
+    color: '#475569',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 34,
+    marginBottom: 32,
+    paddingHorizontal: 6,
   },
   ctaButton: {
     width: '100%',
@@ -159,15 +150,16 @@ const styles = StyleSheet.create({
     position: 'relative',
     shadowColor: '#D82B5A',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    elevation: 6,
   },
   ctaButtonText: {
     color: '#FFFFFF',
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
     textAlign: 'center',
+    letterSpacing: 0.2,
   },
   arrowCircle: {
     position: 'absolute',
@@ -178,14 +170,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  loginLink: {
-    marginTop: 20,
-    paddingVertical: 4,
-  },
-  loginText: {
-    color: '#D82B5A',
-    fontSize: 13,
-    fontWeight: '700',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
 });
