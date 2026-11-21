@@ -10,8 +10,8 @@ import {
   Platform,
   Linking 
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { BookItem, Course, UserProfile, UserRole } from '../types';
 import { getRoleMeta } from '../lib/roles';
 import CheckoutModal from '../components/CheckoutModal';
@@ -149,9 +149,11 @@ export default function HomeScreen({
   onLoginUser?: (u: UserProfile | null) => void;
   onOpenOnboarding?: () => void;
 }) {
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [activeClassFilter, setActiveClassFilter] = useState<string>('Semua');
+  const [aboutTab, setAboutTab] = useState<'visi' | 'misi'>('visi');
   
   // State Interaktif: Tantangan Harian & Poin
   const [points, setPoints] = useState<number>(150);
@@ -209,16 +211,19 @@ export default function HomeScreen({
       {/* ================================================================= */}
       {/* 1. TOP HEADER                                                     */}
       {/* ================================================================= */}
-      <View className="px-5 pt-3 pb-3 bg-[#FAF6F0] border-b border-amber-100/60 flex-row items-center justify-between">
+      <View 
+        className="px-5 pb-3 bg-[#FAF6F0] border-b border-amber-100/60 flex-row items-center justify-between"
+        style={{ paddingTop: Math.max(insets.top + 8, 16) }}
+      >
         <View className="flex-1 pr-2">
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => navigation?.navigate('Profil')}
-            className="flex-row items-center gap-1.5 mb-0.5 self-start px-2.5 py-1 rounded-full border"
+            className="flex-row items-center gap-1.5 mb-1 self-start px-2.5 py-1 rounded-full border"
             style={{ backgroundColor: `${roleColor}14`, borderColor: `${roleColor}40` }}
           >
             <View className="w-2 h-2 rounded-full" style={{ backgroundColor: roleColor }} />
-            <Text className="text-[9px] font-black tracking-wider uppercase" style={{ color: roleColor }}>
+            <Text className="text-[9.5px] font-black tracking-wider uppercase" style={{ color: roleColor }}>
               {isLoggedIn ? (user?.roleTitle || 'Sobat Ceria Fun Learning') : 'Sobat Ceria (Umum)'}
             </Text>
             <Feather name="chevron-down" size={10} color={roleColor} />
@@ -233,8 +238,8 @@ export default function HomeScreen({
           </Text>
         </View>
         
-        {/* Action Buttons: Poin, Pencarian, & Profil / Tombol Masuk */}
-        <View className="flex-row items-center gap-2">
+        {/* Action Buttons: Poin, Info Onboarding, Pencarian, & Profil / Tombol Masuk */}
+        <View className="flex-row items-center gap-1.5">
           {/* Badge Poin Ceria (Hanya jika login sebagai Orang Tua) */}
           {isLoggedIn && userRole === 'parent' && (
             <TouchableOpacity 
@@ -243,16 +248,27 @@ export default function HomeScreen({
                 const msg = `Saldo Poin Ceria kamu: ${points} Poin.\nPoin ini dapat digunakan untuk potongan harga pendaftaran kelas atau voucher reward!`;
                 Platform.OS === 'web' ? window.alert(msg) : alert(msg);
               }}
-              className="flex-row items-center gap-1 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-2xl shadow-xs"
+              className="flex-row items-center gap-1 bg-amber-50 border border-amber-200 px-2.5 h-9 rounded-xl shadow-xs"
             >
               <Text className="text-xs">🪙</Text>
               <Text className="text-xs font-black text-amber-700">{points}</Text>
             </TouchableOpacity>
           )}
 
+          {/* Tombol Info / Onboarding (Akses Panduan Awal) */}
+          {onOpenOnboarding && (
+            <TouchableOpacity 
+              className="w-9 h-9 rounded-xl bg-white border border-gray-200 items-center justify-center shadow-xs active:scale-95"
+              onPress={onOpenOnboarding}
+              accessibilityLabel="Buka Panduan Onboarding"
+            >
+              <Feather name="info" size={16} color="#C81E45" />
+            </TouchableOpacity>
+          )}
+
           {/* Tombol Pencarian */}
           <TouchableOpacity 
-            className="w-9 h-9 rounded-2xl bg-white border border-gray-200 items-center justify-center shadow-xs active:scale-95"
+            className="w-9 h-9 rounded-xl bg-white border border-gray-200 items-center justify-center shadow-xs active:scale-95"
             onPress={() => setIsSearchOpen(!isSearchOpen)}
           >
             <Feather name={isSearchOpen ? 'x' : 'search'} size={16} color="#162E5C" />
@@ -261,7 +277,7 @@ export default function HomeScreen({
           {/* Tombol Profil (Jika Login) ATAU Tombol Masuk (Jika Belum Login) */}
           {isLoggedIn ? (
             <TouchableOpacity 
-              className="w-9 h-9 rounded-2xl items-center justify-center shadow-xs active:scale-95"
+              className="w-9 h-9 rounded-xl items-center justify-center shadow-xs active:scale-95"
               style={{ backgroundColor: roleColor }}
               onPress={() => navigation?.navigate('Profil')}
             >
@@ -271,7 +287,7 @@ export default function HomeScreen({
             <TouchableOpacity 
               activeOpacity={0.85}
               onPress={() => navigation?.navigate('Profil')}
-              className="bg-[#D82B5A] px-3.5 py-2 rounded-2xl shadow-xs active:scale-95 flex-row items-center gap-1"
+              className="bg-[#C81E45] h-9 px-3.5 rounded-xl shadow-xs active:scale-95 flex-row items-center gap-1.5"
             >
               <Feather name="log-in" size={13} color="#FFFFFF" />
               <Text className="text-xs font-black text-white">Masuk</Text>
@@ -303,173 +319,170 @@ export default function HomeScreen({
       )}
 
       <ScrollView 
-        contentContainerStyle={{ paddingBottom: 110 }} 
+        contentContainerStyle={{ paddingBottom: 120 }} 
         showsVerticalScrollIndicator={false}
         className="flex-1"
       >
         {/* ================================================================= */}
-        {/* JIKA BELUM LOGIN: BANNER SAMBUTAN EDUKATIF UMUM                  */}
+        {/* 1. HERO BANNER PROGRAM UNGGULAN (LEBIH RAMPING, LEGA & PROPORSIONAL) */}
         {/* ================================================================= */}
-        {!isLoggedIn && (
-          <View className="px-5 pt-3">
-            <View className="bg-white p-4.5 rounded-[2rem] border border-amber-200/60 shadow-xs">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1 pr-3">
-                  <View className="flex-row items-center gap-1 mb-1">
-                    <Text className="text-sm">🌱</Text>
-                    <Text className="text-[10px] font-black text-[#D82B5A] uppercase tracking-wider">
-                      Ruang Belajar Inklusif & Ceria
-                    </Text>
-                  </View>
-                  <Text className="text-xs md:text-sm font-black text-[#162E5C] leading-snug">
-                    Selamat Datang di Sobat Ceria Fun Learning!
-                  </Text>
-                  <Text className="text-[10px] text-gray-500 font-medium mt-1 leading-relaxed">
-                    Masuk dengan akunmu untuk melihat rapor perkembangan anak, jadwal mengajar fasilitator, atau portal sekolah binaan.
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() => navigation?.navigate('Profil')}
-                  className="bg-[#162E5C] px-3.5 py-2.5 rounded-2xl shadow-xs active:scale-95 items-center justify-center shrink-0"
-                >
-                  <Text className="text-[11px] font-black text-white">Buka Akun →</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Tombol Buka Splash / Onboarding */}
-              {onOpenOnboarding && (
-                <View className="flex-row items-center justify-between mt-3 pt-2.5 border-t border-gray-100">
-                  <Text className="text-[10px] text-gray-400 font-medium">
-                    Ingin melihat panduan awal & sambutan?
-                  </Text>
-                  <TouchableOpacity
-                    onPress={onOpenOnboarding}
-                    className="bg-[#D82B5A]/10 px-3 py-1 rounded-full flex-row items-center gap-1 active:scale-95"
-                  >
-                    <Feather name="star" size={10} color="#D82B5A" />
-                    <Text className="text-[10px] font-black text-[#D82B5A]">Buka Onboarding</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          </View>
-        )}
-
-        {/* ================================================================= */}
-        {/* 2. HERO BANNER CAROUSEL (PROGRAM UNGGULAN TERBUKA UNTUK UMUM)     */}
-        {/* ================================================================= */}
-        <View className="px-5 pt-3 pb-2">
+        <View className="px-5 pt-3 pb-1">
           <View 
-            className="rounded-[2.5rem] p-5 shadow-sm relative overflow-hidden flex-row items-center justify-between min-h-[175px]" 
-            style={{ backgroundColor: '#D82B5A' }}
+            className="rounded-[2.2rem] py-5 px-5 shadow-sm relative overflow-hidden flex-row items-center justify-between" 
+            style={{ backgroundColor: '#C81E45' }}
           >
-            {/* Decorative Rings */}
-            <View className="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-white/10" />
-            <View className="absolute -bottom-8 -right-8 w-28 h-28 rounded-full bg-white/10" />
+            {/* Decorative Subtle Rings */}
+            <View className="absolute -top-10 -left-10 w-28 h-28 rounded-full bg-white/10" />
+            <View className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full bg-white/10" />
 
             {/* Left Content Column */}
             <View className="flex-1 pr-3 z-10 justify-center">
-              <View className="bg-white/20 self-start px-3 py-1 rounded-full mb-2 border border-white/30">
+              <View className="bg-white/20 self-start px-2.5 py-1 rounded-full mb-2 border border-white/30">
                 <Text className="text-white text-[9px] font-black uppercase tracking-wider">
                   Program Stimulasi Terpadu
                 </Text>
               </View>
-              <Text className="text-lg md:text-2xl font-black text-white leading-tight mb-1.5">
-                Program Stimulasi Tumbuh Kembang Anak Usia Dini
+              <Text className="text-[17px] md:text-xl font-black text-white leading-[23px] mb-1.5">
+                Stimulasi Tumbuh Kembang Anak Usia Dini
               </Text>
-              <Text className="text-[10px] text-rose-100 font-medium mb-3 leading-snug">
-                Sobat Ceria Fun Learning menghadirkan kelas belajar sambil bermain yang inklusif berbasis Mindfulness & Family Co-Creation bersama fasilitator profesional.
+              <Text className="text-[11px] text-rose-100 font-medium leading-[16px] mb-3.5" numberOfLines={2}>
+                Belajar inklusif berbasis Mindfulness & Family Co-Creation bersama fasilitator profesional.
               </Text>
 
-              <View className="gap-2">
+              {/* 1 Baris Sejajar Tombol */}
+              <View className="flex-row items-center gap-2">
                 <TouchableOpacity 
-                  className="bg-white rounded-full px-4 py-2 self-start shadow-xs active:scale-95 flex-row items-center gap-1.5"
+                  className="bg-white rounded-full px-3.5 py-2 shadow-xs active:scale-95 flex-row items-center gap-1.5"
                   onPress={() => navigation?.navigate('Screening')}
                 >
-                  <Feather name="activity" size={13} color="#B01E49" />
-                  <Text className="text-xs font-extrabold text-[#B01E49]">Buka Screening STPPA</Text>
+                  <Feather name="activity" size={12} color="#C81E45" />
+                  <Text className="text-[11.5px] font-black text-[#C81E45]">Buka Screening</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
-                  className="rounded-full px-4 py-2 self-start shadow-xs active:scale-95 flex-row items-center gap-1.5 border border-white/70"
+                  className="rounded-full px-3.5 py-2 bg-white/15 active:scale-95 flex-row items-center gap-1 border border-white/60"
                   onPress={() => navigation?.navigate('Kelas')}
                 >
-                  <Text className="text-xs font-extrabold text-white">Daftar Kelas Trial</Text>
-                  <Feather name="arrow-right" size={13} color="#FFFFFF" />
+                  <Text className="text-[11.5px] font-bold text-white">Kelas Trial</Text>
+                  <Feather name="arrow-right" size={12} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
             </View>
 
             {/* Right Graphic */}
-            <View className="w-24 h-24 md:w-28 md:h-28 z-10 items-center justify-center">
+            <View className="w-24 h-24 z-10 items-center justify-center shrink-0">
               <Image 
                 source={bannerImg} 
-                style={{ width: '100%', height: '100%', borderRadius: 16 }}
+                style={{ width: 88, height: 88, borderRadius: 16 }}
                 resizeMode="contain"
               />
             </View>
           </View>
 
           {/* Dots Pagination */}
-          <View className="flex-row justify-center items-center gap-1.5 mt-3">
-            <View className="w-4 h-1.5 rounded-full bg-[#D82B5A]" />
-            <View className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-            <View className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+          <View className="flex-row justify-center items-center gap-1.5 mt-3 mb-1">
+            <View style={{ width: 18, height: 5, borderRadius: 3, backgroundColor: '#C81E45' }} />
+            <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: '#CBD5E1' }} />
+            <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: '#CBD5E1' }} />
           </View>
         </View>
 
         {/* ================================================================= */}
-        {/* MENGENAL SOBAT CERIA & VISI MISI                                  */}
+        {/* 2. GRID 6 AKSES CEPAT FITUR APLIKASI                              */}
         {/* ================================================================= */}
-        <View className="mt-5 px-5">
-          <View className="mb-3">
-            <Text className="text-lg font-black text-[#162E5C]">Mengenal Sobat Ceria</Text>
-            <Text className="text-[11px] text-gray-500 font-medium">Fun Learning usia 2–7 tahun berbasis STPPA</Text>
+        <View className="mt-4 px-5">
+          <View className="flex-row items-center justify-between mb-2.5">
+            <Text className="text-base font-black text-[#162E5C]">Akses Cepat Fitur</Text>
+            <Text className="text-[11px] text-gray-500 font-semibold">6 Layanan Utama</Text>
           </View>
 
-          <View className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-xs">
-            <Image
-              source={require('../assets/dokumentasi sobat/tentang-sobat-ceria.jpeg')}
-              style={{ width: '100%', height: 176 }}
-              resizeMode="cover"
-            />
-            <View className="p-5">
-              <Text className="text-sm font-black text-[#162E5C] mb-2">Tentang Sobat Ceria</Text>
-              <Text className="text-xs text-gray-600 leading-relaxed font-medium mb-4">
-                Sobat Ceria Fun Learning adalah platform terpadu stimulasi tumbuh kembang anak usia 2–7 tahun berbasis STPPA, menghadirkan kelas edukasi interaktif serta pendampingan orang tua berdaya di Lab Tumbuh Kembang FKIP UMS Lantai 2, Pabelan, Sukoharjo.
-              </Text>
-
-              {/* Kartu Visi & Misi (Navy) */}
-              <View className="gap-3">
-                <View className="bg-[#132A5E] p-4 rounded-2xl">
-                  <View className="flex-row items-center gap-2 mb-1.5">
-                    <Feather name="target" size={14} color="#FBBF24" />
-                    <Text className="text-xs font-black text-white">Visi Kami</Text>
-                  </View>
-                  <Text className="text-[11px] text-blue-100 leading-relaxed font-medium">
-                    Menjadi ekosistem pembelajaran ramah anak yang menumbuhkan generasi cerdas, ceria, dan berkarakter.
-                  </Text>
-                </View>
-                <View className="bg-[#132A5E] p-4 rounded-2xl">
-                  <View className="flex-row items-center gap-2 mb-1.5">
-                    <Feather name="compass" size={14} color="#FBBF24" />
-                    <Text className="text-xs font-black text-white">Misi Kami</Text>
-                  </View>
-                  <Text className="text-[11px] text-blue-100 leading-relaxed font-medium">
-                    Menghadirkan stimulasi sensorik-motorik, kelas kriya, komunikasi, serta pemantauan tumbuh kembang inklusif bagi setiap anak.
-                  </Text>
-                </View>
+          <View className="flex-row flex-wrap justify-between gap-y-2.5">
+            {/* 1. Screening STPPA */}
+            <TouchableOpacity
+              style={{ width: '31%' }}
+              className="bg-white p-3 rounded-2xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
+              onPress={() => navigation?.navigate('Screening')}
+            >
+              <View className="w-10 h-10 rounded-2xl bg-[#2DA9E9]/15 border border-[#2DA9E9]/30 items-center justify-center mb-1.5">
+                <Feather name="activity" size={18} color="#2DA9E9" />
               </View>
+              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Screening</Text>
+              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">6 Aspek STPPA</Text>
+            </TouchableOpacity>
 
-              {/* Lokasi Utama */}
-              <View className="flex-row items-center gap-2 mt-4 bg-[#FAF6F0] p-3 rounded-2xl border border-amber-100">
-                <Feather name="map-pin" size={14} color="#D82B5A" />
-                <Text className="text-[11px] text-gray-600 font-semibold flex-1">
-                  Lab Tumbuh Kembang FKIP UMS Lantai 2, Pabelan, Sukoharjo
-                </Text>
+            {/* 2. 8 Program Kelas */}
+            <TouchableOpacity
+              style={{ width: '31%' }}
+              className="bg-white p-3 rounded-2xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
+              onPress={() => navigation?.navigate('Kelas')}
+            >
+              <View className="w-10 h-10 rounded-2xl bg-[#D82B5A]/15 border border-[#D82B5A]/30 items-center justify-center mb-1.5">
+                <Feather name="shopping-bag" size={18} color="#D82B5A" />
               </View>
-            </View>
+              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>8 Kelas</Text>
+              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Stimulasi Terpadu</Text>
+            </TouchableOpacity>
+
+            {/* 3. Berita & Tips */}
+            <TouchableOpacity
+              style={{ width: '31%' }}
+              className="bg-white p-3 rounded-2xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
+              onPress={() => navigation?.navigate('Berita')}
+            >
+              <View className="w-10 h-10 rounded-2xl bg-[#30B864]/15 border border-[#30B864]/30 items-center justify-center mb-1.5">
+                <Feather name="book-open" size={18} color="#30B864" />
+              </View>
+              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Berita & Tips</Text>
+              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Panduan Ortu</Text>
+            </TouchableOpacity>
+
+            {/* 4. Tanya Ahli */}
+            <TouchableOpacity
+              style={{ width: '31%' }}
+              className="bg-white p-3 rounded-2xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
+              onPress={() => {
+                const url = 'https://wa.me/6281234567890?text=Halo%20Admin%20Sobat%20Ceria,%20saya%20ingin%20konsultasi%20tumbuh%20kembang%20anak.';
+                Platform.OS === 'web' ? window.open(url, '_blank') : Linking.openURL(url);
+              }}
+            >
+              <View className="w-10 h-10 rounded-2xl bg-[#8B22C0]/15 border border-[#8B22C0]/30 items-center justify-center mb-1.5">
+                <Feather name="message-circle" size={18} color="#8B22C0" />
+              </View>
+              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Tanya Ahli</Text>
+              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Psikolog PAUD</Text>
+            </TouchableOpacity>
+
+            {/* 5. Lembar Worksheet */}
+            <TouchableOpacity
+              style={{ width: '31%' }}
+              className="bg-white p-3 rounded-2xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
+              onPress={() => {
+                const msg = 'Lembar Printable Worksheet PDF gratis dapat diunduh langsung di materi masing-masing program kelas.';
+                Platform.OS === 'web' ? window.alert(msg) : alert(msg);
+              }}
+            >
+              <View className="w-10 h-10 rounded-2xl bg-[#EAB308]/15 border border-[#EAB308]/30 items-center justify-center mb-1.5">
+                <Feather name="file-text" size={18} color="#CA8A04" />
+              </View>
+              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Worksheet</Text>
+              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Printable Gratis</Text>
+            </TouchableOpacity>
+
+            {/* 6. Dokumentasi Galeri */}
+            <TouchableOpacity
+              style={{ width: '31%' }}
+              className="bg-white p-3 rounded-2xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
+              onPress={() => {
+                const url = 'https://www.instagram.com/sobatceria__?igsh=ZzFmMW5jcXZ6ampp';
+                Platform.OS === 'web' ? window.open(url, '_blank') : Linking.openURL(url);
+              }}
+            >
+              <View className="w-10 h-10 rounded-2xl bg-[#F77712]/15 border border-[#F77712]/30 items-center justify-center mb-1.5">
+                <Feather name="image" size={18} color="#F77712" />
+              </View>
+              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Dokumentasi</Text>
+              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Foto & Video</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -883,104 +896,7 @@ export default function HomeScreen({
           </View>
         )}
 
-        {/* ================================================================= */}
-        {/* 3. GRID 6 AKSES CEPAT FITUR APLIKASI                              */}
-        {/* ================================================================= */}
-        <View className="mt-5 px-5">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-lg font-black text-[#162E5C]">Akses Cepat Fitur</Text>
-            <Text className="text-[11px] text-gray-500 font-semibold">6 Layanan Utama</Text>
-          </View>
 
-          <View className="flex-row flex-wrap justify-between gap-y-3">
-            {/* 1. Screening STPPA */}
-            <TouchableOpacity
-              style={{ width: '31%' }}
-              className="bg-white p-3 rounded-3xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
-              onPress={() => navigation?.navigate('Screening')}
-            >
-              <View className="w-11 h-11 rounded-2xl bg-[#2DA9E9]/15 border border-[#2DA9E9]/30 items-center justify-center mb-1.5">
-                <Feather name="activity" size={20} color="#2DA9E9" />
-              </View>
-              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Screening</Text>
-              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">6 Aspek STPPA</Text>
-            </TouchableOpacity>
-
-            {/* 2. 8 Program Kelas */}
-            <TouchableOpacity
-              style={{ width: '31%' }}
-              className="bg-white p-3 rounded-3xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
-              onPress={() => navigation?.navigate('Kelas')}
-            >
-              <View className="w-11 h-11 rounded-2xl bg-[#D82B5A]/15 border border-[#D82B5A]/30 items-center justify-center mb-1.5">
-                <Feather name="shopping-bag" size={20} color="#D82B5A" />
-              </View>
-              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>8 Kelas</Text>
-              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Stimulasi Terpadu</Text>
-            </TouchableOpacity>
-
-            {/* 3. Berita & Tips */}
-            <TouchableOpacity
-              style={{ width: '31%' }}
-              className="bg-white p-3 rounded-3xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
-              onPress={() => navigation?.navigate('Berita')}
-            >
-              <View className="w-11 h-11 rounded-2xl bg-[#30B864]/15 border border-[#30B864]/30 items-center justify-center mb-1.5">
-                <Feather name="book-open" size={20} color="#30B864" />
-              </View>
-              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Berita & Tips</Text>
-              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Panduan Ortu</Text>
-            </TouchableOpacity>
-
-            {/* 4. Tanya Ahli */}
-            <TouchableOpacity
-              style={{ width: '31%' }}
-              className="bg-white p-3 rounded-3xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
-              onPress={() => {
-                const url = 'https://wa.me/6281234567890?text=Halo%20Admin%20Sobat%20Ceria,%20saya%20ingin%20konsultasi%20tumbuh%20kembang%20anak.';
-                Platform.OS === 'web' ? window.open(url, '_blank') : Linking.openURL(url);
-              }}
-            >
-              <View className="w-11 h-11 rounded-2xl bg-[#8B22C0]/15 border border-[#8B22C0]/30 items-center justify-center mb-1.5">
-                <Feather name="message-circle" size={20} color="#8B22C0" />
-              </View>
-              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Tanya Ahli</Text>
-              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Psikolog PAUD</Text>
-            </TouchableOpacity>
-
-            {/* 5. Lembar Worksheet */}
-            <TouchableOpacity
-              style={{ width: '31%' }}
-              className="bg-white p-3 rounded-3xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
-              onPress={() => {
-                const msg = 'Lembar Printable Worksheet PDF gratis dapat diunduh langsung di materi masing-masing program kelas.';
-                Platform.OS === 'web' ? window.alert(msg) : alert(msg);
-              }}
-            >
-              <View className="w-11 h-11 rounded-2xl bg-[#EAB308]/15 border border-[#EAB308]/30 items-center justify-center mb-1.5">
-                <Feather name="file-text" size={20} color="#CA8A04" />
-              </View>
-              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Worksheet</Text>
-              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Printable Gratis</Text>
-            </TouchableOpacity>
-
-            {/* 6. Dokumentasi Galeri */}
-            <TouchableOpacity
-              style={{ width: '31%' }}
-              className="bg-white p-3 rounded-3xl border border-gray-100 shadow-xs items-center text-center active:scale-95"
-              onPress={() => {
-                const url = 'https://www.instagram.com/sobatceria__?igsh=ZzFmMW5jcXZ6ampp';
-                Platform.OS === 'web' ? window.open(url, '_blank') : Linking.openURL(url);
-              }}
-            >
-              <View className="w-11 h-11 rounded-2xl bg-[#F77712]/15 border border-[#F77712]/30 items-center justify-center mb-1.5">
-                <Feather name="image" size={20} color="#F77712" />
-              </View>
-              <Text className="text-[11px] font-black text-[#162E5C]" numberOfLines={1}>Dokumentasi</Text>
-              <Text className="text-[9px] text-gray-500 font-medium mt-0.5">Foto & Video</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* ================================================================= */}
         {/* 4. SECTION KELAS TERDEKAT (HIGHLIGHT & CAROUSEL)                  */}
@@ -1124,31 +1040,74 @@ export default function HomeScreen({
         </View>
 
         {/* ================================================================= */}
-        {/* LAYANAN & FASILITAS UNGGULAN (5 KARTU)                            */}
+        {/* LAYANAN & FASILITAS UNGGULAN (HORIZONTAL CAROUSEL BEBAS ELIPSIS)  */}
         {/* ================================================================= */}
         <View className="mt-5 px-5">
           <View className="mb-3">
-            <Text className="text-lg font-black text-[#162E5C]">Layanan & Fasilitas Unggulan</Text>
-            <Text className="text-[11px] text-gray-500 font-medium">Dukung tumbuh kembang emas si kecil</Text>
+            <Text className="text-base font-black text-[#162E5C]">Layanan & Fasilitas Unggulan</Text>
+            <Text className="text-[11px] text-gray-500 font-medium">Fasilitas terstandar untuk kenyamanan tumbuh kembang anak</Text>
           </View>
 
-          <View className="flex-row flex-wrap justify-between gap-y-3">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 12 }}
+            className="pb-1"
+          >
             {[
-              { icon: 'users', color: '#D82B5A', title: 'Kelas Tatap Muka', desc: 'Belajar sambil bermain' },
-              { icon: 'box', color: '#EAB308', title: 'Learning Kit', desc: 'Sensory kit terstandar' },
-              { icon: 'activity', color: '#2DA9E9', title: 'Screening Tumbuh Kembang', desc: 'Pantau 6 aspek STPPA' },
-              { icon: 'message-circle', color: '#8B22C0', title: 'Konsultasi Psikolog', desc: 'Pendampingan ahli' },
-              { icon: 'home', color: '#30B864', title: 'Ruangan Ramah Anak', desc: 'Aman & menyenangkan' },
+              { 
+                icon: 'users', 
+                color: '#D82B5A', 
+                title: 'Kelas Tatap Muka', 
+                desc: 'Belajar interaktif sambil bermain terarah bersama fasilitator' 
+              },
+              { 
+                icon: 'box', 
+                color: '#EAB308', 
+                title: 'Sensory Learning Kit', 
+                desc: 'Alat permainan edukatif terstandar & aman untuk si kecil' 
+              },
+              { 
+                icon: 'activity', 
+                color: '#2DA9E9', 
+                title: 'Screening Tumbuh Kembang', 
+                desc: 'Pemantauan 6 aspek perkembangan STPPA secara berkala' 
+              },
+              { 
+                icon: 'message-circle', 
+                color: '#8B22C0', 
+                title: 'Konsultasi Psikolog', 
+                desc: 'Pendampingan privat pola asuh & psikologi perkembangan anak' 
+              },
+              { 
+                icon: 'home', 
+                color: '#30B864', 
+                title: 'Ruangan Ramah Anak', 
+                desc: 'Lingkungan bermain aman, bersih & bebas resiko cedera' 
+              },
             ].map((item) => (
-              <View key={item.title} style={{ width: '48%' }} className="bg-white p-4 rounded-3xl border border-gray-100 shadow-xs">
-                <View className="w-10 h-10 rounded-2xl items-center justify-center mb-2" style={{ backgroundColor: `${item.color}20` }}>
-                  <Feather name={item.icon as any} size={18} color={item.color} />
+              <View 
+                key={item.title} 
+                style={{ width: 210, minHeight: 135 }} 
+                className="bg-white p-4 rounded-3xl border border-gray-100 shadow-xs justify-between"
+              >
+                <View>
+                  <View 
+                    className="w-10 h-10 rounded-2xl items-center justify-center mb-2.5" 
+                    style={{ backgroundColor: `${item.color}18` }}
+                  >
+                    <Feather name={item.icon as any} size={18} color={item.color} />
+                  </View>
+                  <Text className="text-xs font-black text-[#162E5C] leading-snug mb-1">
+                    {item.title}
+                  </Text>
                 </View>
-                <Text className="text-xs font-black text-[#162E5C]" numberOfLines={1}>{item.title}</Text>
-                <Text className="text-[10px] text-gray-500 font-medium mt-0.5" numberOfLines={1}>{item.desc}</Text>
+                <Text className="text-[10px] text-gray-500 font-medium leading-relaxed">
+                  {item.desc}
+                </Text>
               </View>
             ))}
-          </View>
+          </ScrollView>
         </View>
 
         {/* ================================================================= */}
@@ -1157,7 +1116,7 @@ export default function HomeScreen({
         <View className="mt-5 px-5">
           <View className="flex-row items-center justify-between mb-3">
             <View>
-              <Text className="text-lg font-black text-[#162E5C]">Panduan & Buku Pilihan</Text>
+              <Text className="text-base font-black text-[#162E5C]">Panduan & Buku Pilihan</Text>
               <Text className="text-[11px] text-gray-500 font-medium">Bahan ajar & bacaan stimulasi anak</Text>
             </View>
           </View>
@@ -1204,79 +1163,155 @@ export default function HomeScreen({
         </View>
 
         {/* ================================================================= */}
-        {/* 6. VALUE PROPOSITION / MENGAPA SOBAT CERIA                       */}
+        {/* 6. PROFIL TEPERCAYA: TENTANG KAMI, VISI MISI & 3 PILAR KEUNGGULAN  */}
         {/* ================================================================= */}
-        <View className="px-5 mt-6">
-          <View className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xs mb-4">
-            <View className="flex-row items-center gap-2.5 mb-2.5">
-              <View className="w-8 h-8 rounded-full bg-rose-50 items-center justify-center">
-                <Feather name="heart" size={16} color="#D82B5A" />
-              </View>
-              <Text className="text-base font-extrabold text-[#162E5C]">
-                Mengapa Sobat Ceria Fun Learning?
+        <View className="mt-6 px-5">
+          <View className="mb-3">
+            <Text className="text-base font-black text-[#162E5C]">Tentang Sobat Ceria</Text>
+            <Text className="text-[11px] text-gray-500 font-medium">Pusat stimulasi tumbuh kembang emas anak usia 2–7 tahun</Text>
+          </View>
+
+          <View className="bg-white rounded-[2.2rem] overflow-hidden border border-gray-100 shadow-xs">
+            <Image
+              source={require('../assets/dokumentasi sobat/tentang-sobat-ceria.jpeg')}
+              style={{ width: '100%', height: 165 }}
+              resizeMode="cover"
+            />
+            <View className="p-4.5">
+              <Text className="text-sm font-black text-[#162E5C] mb-1.5">
+                Sobat Ceria Fun Learning
               </Text>
+              <Text className="text-xs text-gray-600 leading-relaxed font-medium mb-3.5">
+                Platform terpadu stimulasi tumbuh kembang anak usia 2–7 tahun berbasis STPPA di bawah binaan Lab Tumbuh Kembang FKIP UMS. Kami memadukan stimulasi sensorik-motorik, kelas kriya, komunikasi, dan pendampingan intensif bersama psikolog anak.
+              </Text>
+
+              {/* 3 Pilar Keunggulan Badge */}
+              <View className="flex-row flex-wrap gap-1.5 mb-3.5">
+                <View className="bg-[#30B864]/10 px-3 py-1 rounded-full border border-[#30B864]/20 flex-row items-center gap-1">
+                  <Text className="text-[10px]">🌱</Text>
+                  <Text className="text-[9.5px] font-black text-[#166534]">Inklusif (ABK Welcome)</Text>
+                </View>
+                <View className="bg-[#7C3AED]/10 px-3 py-1 rounded-full border border-[#7C3AED]/20 flex-row items-center gap-1">
+                  <Text className="text-[10px]">🧘‍♂️</Text>
+                  <Text className="text-[9.5px] font-black text-[#6D28D9]">Mindfulness Kids</Text>
+                </View>
+                <View className="bg-[#EA580C]/10 px-3 py-1 rounded-full border border-[#EA580C]/20 flex-row items-center gap-1">
+                  <Text className="text-[10px]">👨‍👩‍👧</Text>
+                  <Text className="text-[9.5px] font-black text-[#C2410C]">Family Co-Creation</Text>
+                </View>
+              </View>
+
+              {/* Tab Toggle Visi / Misi */}
+              <View className="bg-[#FAF6F0] p-1.5 rounded-2xl flex-row gap-1.5 mb-3 border border-amber-100">
+                <TouchableOpacity
+                  onPress={() => setAboutTab('visi')}
+                  className={`flex-1 py-1.5 rounded-xl items-center justify-center ${
+                    aboutTab === 'visi' ? 'bg-[#132A5E] shadow-xs' : 'bg-transparent'
+                  }`}
+                >
+                  <Text className={`text-[10px] font-black ${aboutTab === 'visi' ? 'text-white' : 'text-gray-600'}`}>
+                    Visi Kami
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setAboutTab('misi')}
+                  className={`flex-1 py-1.5 rounded-xl items-center justify-center ${
+                    aboutTab === 'misi' ? 'bg-[#132A5E] shadow-xs' : 'bg-transparent'
+                  }`}
+                >
+                  <Text className={`text-[10px] font-black ${aboutTab === 'misi' ? 'text-white' : 'text-gray-600'}`}>
+                    Misi Kami
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Konten Tab Visi / Misi */}
+              <View className="bg-[#132A5E] p-3.5 rounded-2xl mb-3.5">
+                {aboutTab === 'visi' ? (
+                  <View>
+                    <View className="flex-row items-center gap-1.5 mb-1">
+                      <Feather name="target" size={13} color="#FBBF24" />
+                      <Text className="text-[11px] font-black text-amber-300">Visi Sobat Ceria</Text>
+                    </View>
+                    <Text className="text-[10.5px] text-blue-100 leading-relaxed font-medium">
+                      Menjadi ekosistem pembelajaran ramah anak yang menumbuhkan generasi cerdas, ceria, mandiri, dan berkarakter mulia.
+                    </Text>
+                  </View>
+                ) : (
+                  <View>
+                    <View className="flex-row items-center gap-1.5 mb-1">
+                      <Feather name="compass" size={13} color="#FBBF24" />
+                      <Text className="text-[11px] font-black text-amber-300">Misi Sobat Ceria</Text>
+                    </View>
+                    <Text className="text-[10.5px] text-blue-100 leading-relaxed font-medium">
+                      Menghadirkan stimulasi sensorik-motorik terpadu, kelas kriya, komunikasi, serta pemantauan tumbuh kembang inklusif bagi setiap anak.
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Lokasi Utama Lab UMS */}
+              <View className="flex-row items-center gap-2 bg-[#FAF6F0] p-2.5 rounded-2xl border border-amber-100">
+                <Feather name="map-pin" size={13} color="#D82B5A" />
+                <Text className="text-[10.5px] text-gray-700 font-semibold flex-1">
+                  Lab Tumbuh Kembang FKIP UMS Lantai 2, Kampus Pabelan, Sukoharjo
+                </Text>
+              </View>
             </View>
+          </View>
+        </View>
 
-            <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-              Program kami memadukan stimulasi sensorik-motorik, kelas kriya, komunikasi, serta pemantauan intensif oleh psikolog anak & fasilitator PAUD. Kami mendukung penuh tumbuh kembang emas bebas kecanduan gadget.
-            </Text>
-
-            {/* 3 Pilar Badge */}
-            <View className="flex-row flex-wrap gap-2 mb-4">
-              <View className="bg-[#30B864]/10 px-3.5 py-1.5 rounded-full border border-[#30B864]/20 flex-row items-center gap-1.5">
-                <Text className="text-xs">🌱</Text>
-                <Text className="text-[10px] font-black text-[#30B864]">Inklusif (ABK Welcome)</Text>
+        {/* ================================================================= */}
+        {/* BANNER BANTUAN WHATSAPP (SEJAJAR RAPI 1 BARIS)                    */}
+        {/* ================================================================= */}
+        <View className="px-5 mt-4">
+          <View className="bg-white p-4 rounded-3xl border border-gray-100 shadow-xs flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2.5 flex-1 pr-3">
+              <View className="w-9 h-9 rounded-2xl bg-rose-50 items-center justify-center">
+                <Feather name="headphones" size={16} color="#D82B5A" />
               </View>
-              <View className="bg-[#5A3B8B]/10 px-3.5 py-1.5 rounded-full border border-[#5A3B8B]/20 flex-row items-center gap-1.5">
-                <Text className="text-xs">🧘‍♂️</Text>
-                <Text className="text-[10px] font-black text-[#5A3B8B]">Mindfulness Kids</Text>
-              </View>
-              <View className="bg-[#F77712]/10 px-3.5 py-1.5 rounded-full border border-[#F77712]/20 flex-row items-center gap-1.5">
-                <Text className="text-xs">👨‍👩‍👧</Text>
-                <Text className="text-[10px] font-black text-[#F77712]">Family Co-Creation</Text>
+              <View className="flex-1">
+                <Text className="text-xs font-black text-[#162E5C]">Butuh Bantuan Pendaftaran?</Text>
+                <Text className="text-[10px] text-gray-500 font-medium">Konsultasi jadwal & info program</Text>
               </View>
             </View>
-
-            {/* Help & Contact Bar */}
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => {
                 const url = 'https://wa.me/6281234567890?text=Halo%20Sobat%20Ceria,%20saya%20ingin%20bertanya%20informasi%20kelas.';
                 Platform.OS === 'web' ? window.open(url, '_blank') : Linking.openURL(url);
               }}
-              className="bg-[#FAF6F0] p-3 rounded-2xl flex-row items-center justify-between border border-amber-200/50"
+              className="bg-[#16A34A] px-4 py-2 rounded-full flex-row items-center gap-1.5 shrink-0 active:scale-95 shadow-xs"
             >
-              <View className="flex-row items-center gap-2">
-                <Feather name="headphones" size={16} color="#D82B5A" />
-                <Text className="text-xs font-bold text-[#162E5C]">Butuh Bantuan Pendaftaran?</Text>
-              </View>
-              <Text className="text-xs font-black text-[#D82B5A]">Chat WhatsApp →</Text>
+              <Feather name="message-circle" size={13} color="#FFFFFF" />
+              <Text className="text-xs font-black text-white">Chat WA</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* ================================================================= */}
-        {/* KATA ORANG TUA (TESTIMONI)                                        */}
+        {/* KATA ORANG TUA (TESTIMONI DENGAN 5 BINTANG GOLD)                  */}
         {/* ================================================================= */}
         <View className="px-5 mt-6">
           <View className="mb-3">
-            <Text className="text-lg font-black text-[#162E5C]">Kata Orang Tua</Text>
+            <Text className="text-base font-black text-[#162E5C]">Kata Orang Tua</Text>
             <Text className="text-[11px] text-gray-500 font-medium">Cerita nyata dari keluarga Sobat Ceria</Text>
           </View>
 
-          <View className="bg-white p-5 rounded-[2.5rem] border border-gray-100 shadow-xs">
+          <View className="bg-white p-5 rounded-[2.2rem] border border-gray-100 shadow-xs">
             <View className="flex-row items-center gap-1 mb-3">
               {[1, 2, 3, 4, 5].map((s) => (
-                <Feather key={s} name="star" size={16} color="#FBBF24" />
+                <Ionicons key={s} name="star" size={16} color="#F59E0B" />
               ))}
             </View>
-            <Text className="text-sm text-gray-700 leading-relaxed font-medium mb-4">
+            <Text className="text-xs md:text-sm text-gray-700 leading-relaxed font-medium mb-4">
               "Sobat Ceria benar-benar jawaban untuk masalah kecanduan gadget anak saya. Sejak ikut kelas sensory & rutin dipantau via grafik STPPA, Arka jadi jauh lebih aktif bicaranya dan makin berani bersosialisasi."
             </Text>
             <View className="flex-row items-center gap-3">
               <Image
                 source={{ uri: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150' }}
-                className="w-11 h-11 rounded-full bg-gray-200 border border-rose-100"
+                className="w-10 h-10 rounded-full bg-gray-200 border border-rose-100"
               />
               <View>
                 <Text className="text-xs font-black text-[#162E5C]">Bunda Dinda & Arka (4 Thn)</Text>
@@ -1291,11 +1326,11 @@ export default function HomeScreen({
         {/* ================================================================= */}
         <View className="px-5 mt-6">
           <View className="mb-3">
-            <Text className="text-lg font-black text-[#162E5C]">Jejaring Mitra & Sekolah</Text>
+            <Text className="text-base font-black text-[#162E5C]">Jejaring Mitra & Sekolah</Text>
             <Text className="text-[11px] text-gray-500 font-medium">Berkolaborasi bersama lembaga PAUD terpercaya</Text>
           </View>
 
-          <View className="bg-white p-5 rounded-[2.5rem] border border-gray-100 shadow-xs">
+          <View className="bg-white p-4.5 rounded-[2.2rem] border border-gray-100 shadow-xs">
             <View className="flex-row flex-wrap gap-2">
               {[
                 'TK Intan Permata',
@@ -1305,8 +1340,8 @@ export default function HomeScreen({
                 'TK Bintangku',
                 'TK IT Al Muhsin Klaten',
               ].map((mitra) => (
-                <View key={mitra} className="bg-[#FAF6F0] px-3.5 py-2 rounded-full border border-amber-100">
-                  <Text className="text-[11px] font-bold text-[#162E5C]">{mitra}</Text>
+                <View key={mitra} className="bg-[#FAF6F0] px-3.5 py-1.5 rounded-full border border-amber-100">
+                  <Text className="text-[10.5px] font-bold text-[#162E5C]">{mitra}</Text>
                 </View>
               ))}
             </View>
