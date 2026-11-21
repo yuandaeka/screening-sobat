@@ -33,21 +33,44 @@ export default function OnboardingScreen({ onGetStarted }: OnboardingScreenProps
           resizeMode="cover"
         />
 
-        {/* 2. Gradasi Halus: Bening di Atas (Foto Jelas), Putih Lembut di Bawah */}
+        {/* 2. Gradasi Halus: Bening di Atas (Foto Jelas), Putih Lembut & Solid di Bawah */}
         <LinearGradient
           colors={[
             'rgba(255, 255, 255, 0)',
             'rgba(255, 255, 255, 0)',
-            'rgba(255, 255, 255, 0.45)',
-            'rgba(255, 255, 255, 0.88)',
+            'rgba(255, 255, 255, 0.35)',
+            'rgba(255, 255, 255, 0.85)',
+            'rgba(255, 255, 255, 0.98)',
             '#FFFFFF',
           ]}
-          locations={[0, 0.42, 0.62, 0.8, 0.96]}
+          locations={[0, 0.38, 0.55, 0.72, 0.88, 1]}
           style={styles.gradientFade}
         />
       </View>
 
-      {/* 3. Konten Teks & Tombol di Bagian Bawah */}
+      {/* 3. Floating Brand Header Pill di Bagian Atas Layar */}
+      <View
+        style={[
+          styles.topHeader,
+          {
+            top: Math.max(insets.top + 16, 28),
+          },
+        ]}
+      >
+        <View style={styles.brandPill}>
+          <Image
+            source={require('../assets/sobatceria.png')}
+            style={styles.brandLogo}
+            resizeMode="contain"
+          />
+          <View style={styles.brandTextContainer}>
+            <Text style={styles.brandTitle}>Sobat Ceria</Text>
+            <Text style={styles.brandSubLabel}>Fun Learning</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* 4. Konten Teks & Tombol di Bagian Bawah */}
       <View
         style={[
           styles.bottomContent,
@@ -56,16 +79,6 @@ export default function OnboardingScreen({ onGetStarted }: OnboardingScreenProps
           },
         ]}
       >
-        {/* Brand Chip */}
-        <View style={styles.brandRow}>
-          <Image
-            source={require('../assets/sobatceria.png')}
-            style={styles.brandLogo}
-            resizeMode="contain"
-          />
-          <Text style={styles.brandName}>Sobat Ceria</Text>
-        </View>
-
         {/* Heading */}
         <Text style={styles.title}>
           Care For Your Child{'\n'}Optimal Development
@@ -116,6 +129,52 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  topHeader: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 20,
+    paddingHorizontal: 20,
+  },
+  brandPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  brandLogo: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    marginRight: 12,
+  },
+  brandTextContainer: {
+    justifyContent: 'center',
+  },
+  brandTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#C81E45',
+    letterSpacing: -0.2,
+    lineHeight: 22,
+  },
+  brandSubLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#132A5E',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
   bottomContent: {
     position: 'absolute',
     bottom: 0,
@@ -124,33 +183,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26,
     alignItems: 'center',
     zIndex: 10,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(216, 43, 90, 0.15)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-  brandLogo: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-  },
-  brandName: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#D82B5A',
-    letterSpacing: 0.2,
   },
   title: {
     fontSize: 29,
